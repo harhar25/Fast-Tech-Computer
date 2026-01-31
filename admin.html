@@ -384,6 +384,11 @@
                                 <label class="form-label">Description</label>
                                 <textarea class="form-control" id="newProductDescription" rows="3" required></textarea>
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label">Specifications (JSON format)</label>
+                                <textarea class="form-control" id="newProductSpecs" rows="4" placeholder='{"cores": "8", "clock": "3.5GHz", "cache": "16MB"}'></textarea>
+                                <small class="form-text text-muted">Enter product specifications in JSON format. Example: {"cores": "8", "clock": "3.5GHz", "cache": "16MB"}</small>
+                            </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Image URL</label>
@@ -462,6 +467,11 @@
                         <div class="mb-3">
                             <label class="form-label">Description</label>
                             <textarea class="form-control" id="editProductDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Specifications (JSON format)</label>
+                            <textarea class="form-control" id="editProductSpecs" rows="4" placeholder='{"cores": "8", "clock": "3.5GHz", "cache": "16MB"}'></textarea>
+                            <small class="form-text text-muted">Enter product specifications in JSON format. Example: {"cores": "8", "clock": "3.5GHz", "cache": "16MB"}</small>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -881,16 +891,28 @@
                 const category = document.getElementById('newProductCategory').value;
                 const price = document.getElementById('newProductPrice').value;
                 const description = document.getElementById('newProductDescription').value;
+                const specsText = document.getElementById('newProductSpecs').value;
                 const image = document.getElementById('newProductImage').value;
                 const originalPrice = document.getElementById('newProductOriginalPrice').value;
                 const badge = document.getElementById('newProductBadge').value;
                 
-                console.log('Form values:', { name, brand, category, price, description });
+                console.log('Form values:', { name, brand, category, price, description, specsText });
                 
                 // Validate required fields
                 if (!name || !brand || !category || !price || !description) {
                     showAlert('Please fill in all required fields.', 'warning');
                     return;
+                }
+                
+                // Parse specs JSON
+                let specs = {};
+                if (specsText.trim()) {
+                    try {
+                        specs = JSON.parse(specsText);
+                    } catch (error) {
+                        showAlert('Invalid JSON format in specifications field. Please check your input.', 'warning');
+                        return;
+                    }
                 }
                 
                 const newProduct = {
@@ -900,13 +922,13 @@
                     category: category,
                     price: parseFloat(price),
                     description: description,
+                    specs: specs,
                     image: image || 'https://via.placeholder.com/300x300/cccccc/ffffff?text=No+Image',
                     originalPrice: originalPrice ? parseFloat(originalPrice) : null,
                     badge: badge,
                     inStock: true,
                     rating: 4.5,
-                    reviews: 0,
-                    specs: {}
+                    reviews: 0
                 };
                 
                 console.log('New product object:', newProduct);
@@ -950,6 +972,7 @@
             document.getElementById('editProductCategory').value = product.category;
             document.getElementById('editProductPrice').value = product.price;
             document.getElementById('editProductDescription').value = product.description;
+            document.getElementById('editProductSpecs').value = product.specs ? JSON.stringify(product.specs, null, 2) : '';
             document.getElementById('editProductImage').value = product.image;
             document.getElementById('editProductOriginalPrice').value = product.originalPrice || '';
             document.getElementById('editProductBadge').value = product.badge || '';
@@ -973,6 +996,18 @@
                 category: document.getElementById('editProductCategory').value,
                 price: parseFloat(document.getElementById('editProductPrice').value),
                 description: document.getElementById('editProductDescription').value,
+                specs: (() => {
+                    const specsText = document.getElementById('editProductSpecs').value;
+                    if (specsText.trim()) {
+                        try {
+                            return JSON.parse(specsText);
+                        } catch (error) {
+                            showAlert('Invalid JSON format in specifications field. Please check your input.', 'warning');
+                            return currentProducts[productIndex].specs;
+                        }
+                    }
+                    return {};
+                })(),
                 image: document.getElementById('editProductImage').value,
                 originalPrice: document.getElementById('editProductOriginalPrice').value ? parseFloat(document.getElementById('editProductOriginalPrice').value) : null,
                 badge: document.getElementById('editProductBadge').value,
