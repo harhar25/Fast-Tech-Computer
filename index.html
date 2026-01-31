@@ -1,6 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+- Sales reports and analytics- Order management- Inventory tracking- Product image upload functionality- User authentication system- Backend integration for persistent storage## Future Enhancements- **Authentication**: Simple demo login (can be enhanced with backend)- **Architecture**: Client-side product management- **Storage**: Browser localStorage- **Framework**: Bootstrap 5.3.0## Technical Details- `styles-enterprise.css` - Styling- `products.js` - Product database and utilities- `admin.js` - Admin functionality and logic- `admin.html` - Admin dashboard UI## File Structure   - **Logout**: Exit admin panel   - **Add Product**: Create new products   - **Products**: Manage existing products   - **Overview**: View dashboard statistics4. Navigate using the sidebar menu:3. Login with demo credentials (admin / admin123)2. Click the "Admin" link in the navigation bar1. Open the main website (index.html)## How to Access- Changes affect the entire store immediately- Products are preserved across browser sessions- All changes are saved to localStorage### 4. **Data Persistence**- Confirmation dialogs to prevent accidental deletion  - Delete button in edit modal  - Quick delete from table view- Two deletion methods:- Remove products from inventory#### Delete Products- Real-time image preview  - Stock status  - Category  - Image URL  - Price  - Description- Change any product detail:- Click "Edit" button to modify existing products#### Edit Products- Form validation- Image preview before adding  - Badge (Hot, Sale, New)  - Stock status  - Rating  - Product image URL  - Description  - Brand  - Price (current and original)  - Category (Processors, Graphics Cards, Memory, Storage, Motherboards, Power Supplies, Cooling, Cases)  - Product name- Create new products with full details:#### Add Products- Quick action buttons for editing and deleting- See product details: name, category, price, stock status- Search products by name or ID- Browse all products in a table format#### View Products### 3. **Product Management**- Calculate total inventory value- Track number of categories- See in-stock count- View total number of products### 2. **Dashboard Overview**- Session persistence using localStorage- Demo Password: `admin123`- Demo Username: `admin`- Secure login system with demo credentials### 1. **Admin Login**The admin dashboard allows administrators to manage products with the following features:## Admin Features<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fast Tech - Premium Computer Parts Store</title>
@@ -41,6 +135,11 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#contact">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin.html">
+                            <i class="bi bi-shield-lock"></i> Admin
+                        </a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center">
@@ -202,7 +301,7 @@
             </div>
             <hr class="bg-white">
             <div class="text-center">
-                <p>&copy; 2024 Fast Tech. All rights reserved.</p>
+                <p>&copy; 2026 Fast Tech. All rights reserved.</p>
             </div>
         </div>
     </footer>

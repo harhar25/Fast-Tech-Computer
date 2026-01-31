@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Fast Tech</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles-enterprise.css">
+    <style>
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #1a1a1a;
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-menu li {
+            margin: 10px 0;
+        }
+        .sidebar-menu a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: #007bff;
+        }
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 30px;
+            background-color: #f5f5f5;
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .product-table {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-form-group {
+            margin-bottom: 15px;
+        }
+        .modal-form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .product-image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container" id="adminContainer">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="w-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+            <div class="card shadow-lg" style="width: 100%; max-width: 400px;">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-shield-lock" style="font-size: 3rem; color: #007bff;"></i>
+                        <h3 class="mt-3">Admin Login</h3>
+                    </div>
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="adminUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="adminUsername" placeholder="Enter username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="adminPassword" placeholder="Enter password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </form>
+                    <div class="alert alert-info mt-3 small">
+                        <strong>Demo Credentials:</strong><br>
+                        Username: admin<br>
+                        Password: admin123
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div id="dashboardScreen" style="display: none; width: 100%;">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="mb-4">
+                    <h5 class="text-white"><i class="bi bi-speedometer2"></i> Dashboard</h5>
+                </div>
+                <ul class="sidebar-menu">
+                    <li><a href="#" onclick="showSection('overview')" class="menu-link active" data-section="overview"><i class="bi bi-house"></i> Overview</a></li>
+                    <li><a href="#" onclick="showSection('products')" class="menu-link" data-section="products"><i class="bi bi-box"></i> Products</a></li>
+                    <li><a href="#" onclick="showSection('addProduct')" class="menu-link" data-section="addProduct"><i class="bi bi-plus-circle"></i> Add Product</a></li>
+                    <li><a href="#" onclick="logout()" class="menu-link"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="dashboard-header">
+                    <h1>Admin Dashboard</h1>
+                    <div>
+                        <span class="me-3" id="adminName">Admin</span>
+                        <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+
+                <!-- Overview Section -->
+                <div id="overviewSection" class="section-content">
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">Total Products</h6>
+                                    <h3 id="totalProducts">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">In Stock</h6>
+                                    <h3 id="inStockCount">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">Categories</h6>
+                                    <h3 id="categoryCount">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">Total Value</h6>
+                                    <h3 id="totalValue">$0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Management Section -->
+                <div id="productsSection" class="section-content" style="display: none;">
+                    <div class="product-table">
+                        <div class="mb-3">
+                            <h5>Manage Products</h5>
+                            <input type="text" class="form-control" id="searchProducts" placeholder="Search products...">
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="productsTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productsTableBody">
+                                    <!-- Products will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add/Edit Product Section -->
+                <div id="addProductSection" class="section-content" style="display: none;">
+                    <div class="product-table">
+                        <h5 class="mb-4" id="formTitle">Add New Product</h5>
+                        <form id="productForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="modal-form-group">
+                                        <label for="productName">Product Name *</label>
+                                        <input type="text" class="form-control" id="productName" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="modal-form-group">
+                                        <label for="productCategory">Category *</label>
+                                        <select class="form-control" id="productCategory" required>
+                                            <option value="">Select Category</option>
+                                            <option value="processors">Processors</option>
+                                            <option value="graphics-cards">Graphics Cards</option>
+                                            <option value="memory">Memory</option>
+                                            <option value="storage">Storage</option>
+                                            <option value="motherboards">Motherboards</option>
+                                            <option value="power-supplies">Power Supplies</option>
+                                            <option value="cooling">Cooling</option>
+                                            <option value="cases">Cases</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="modal-form-group">
+                                        <label for="productPrice">Price ($) *</label>
+                                        <input type="number" class="form-control" id="productPrice" step="0.01" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="modal-form-group">
+                                        <label for="productOriginalPrice">Original Price ($)</label>
+                                        <input type="number" class="form-control" id="productOriginalPrice" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="modal-form-group">
+                                        <label for="productBrand">Brand</label>
+                                        <input type="text" class="form-control" id="productBrand">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="modal-form-group">
+                                        <label for="productRating">Rating</label>
+                                        <input type="number" class="form-control" id="productRating" min="0" max="5" step="0.1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-form-group">
+                                <label for="productDescription">Description *</label>
+                                <textarea class="form-control" id="productDescription" rows="3" required></textarea>
+                            </div>
+
+                            <div class="modal-form-group">
+                                <label for="productImage">Image URL *</label>
+                                <input type="url" class="form-control" id="productImage" required>
+                                <img id="imagePreview" class="product-image-preview" style="display: none;">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="modal-form-group">
+                                        <label for="productInStock">
+                                            <input type="checkbox" id="productInStock" checked>
+                                            In Stock
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="modal-form-group">
+                                        <label for="productBadge">Badge</label>
+                                        <select class="form-control" id="productBadge">
+                                            <option value="">None</option>
+                                            <option value="hot">Hot</option>
+                                            <option value="sale">Sale</option>
+                                            <option value="new">New</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-form-group">
+                                <button type="submit" class="btn btn-primary" id="submitBtn">Add Product</button>
+                                <button type="button" class="btn btn-secondary ms-2" onclick="resetForm()">Clear</button>
+                                <button type="button" class="btn btn-danger ms-2" id="deleteBtn" style="display: none;" onclick="deleteProduct()">Delete Product</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div class="modal fade" id="editProductModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProductForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="modal-form-group">
+                                    <label for="editProductName">Product Name *</label>
+                                    <input type="text" class="form-control" id="editProductName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="modal-form-group">
+                                    <label for="editProductCategory">Category *</label>
+                                    <select class="form-control" id="editProductCategory" required>
+                                        <option value="">Select Category</option>
+                                        <option value="processors">Processors</option>
+                                        <option value="graphics-cards">Graphics Cards</option>
+                                        <option value="memory">Memory</option>
+                                        <option value="storage">Storage</option>
+                                        <option value="motherboards">Motherboards</option>
+                                        <option value="power-supplies">Power Supplies</option>
+                                        <option value="cooling">Cooling</option>
+                                        <option value="cases">Cases</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="modal-form-group">
+                                    <label for="editProductPrice">Price ($) *</label>
+                                    <input type="number" class="form-control" id="editProductPrice" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="modal-form-group">
+                                    <label for="editProductOriginalPrice">Original Price ($)</label>
+                                    <input type="number" class="form-control" id="editProductOriginalPrice" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-form-group">
+                            <label for="editProductDescription">Description *</label>
+                            <textarea class="form-control" id="editProductDescription" rows="3" required></textarea>
+                        </div>
+
+                        <div class="modal-form-group">
+                            <label for="editProductImage">Image URL *</label>
+                            <input type="url" class="form-control" id="editProductImage" required>
+                            <img id="editImagePreview" class="product-image-preview" style="display: none;">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="modal-form-group">
+                                    <label for="editProductInStock">
+                                        <input type="checkbox" id="editProductInStock">
+                                        In Stock
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-form-group">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="button" class="btn btn-danger ms-2" onclick="deleteCurrentProduct()">Delete</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="products.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
