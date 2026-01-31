@@ -1,6 +1,41 @@
 // Main JavaScript for TechHub Computer Parts Store
 
-document.addEventListener('DOMContentLoaded', function() {
+// Firebase integration
+let firebaseDB, firebaseRef, firebaseGet;
+
+// Initialize Firebase for main website
+document.addEventListener('DOMContentLoaded', async function() {
+    // Load Firebase SDK
+    try {
+        const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js");
+        const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js");
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhy1IWM62djijn4vRUNmfYFTA3tGPY5tU",
+            authDomain: "fast-tech-computer.firebaseapp.com",
+            databaseURL: "https://fast-tech-computer-default-rtdb.firebaseio.com",
+            projectId: "fast-tech-computer",
+            storageBucket: "fast-tech-computer.firebasestorage.app",
+            messagingSenderId: "503689724923",
+            appId: "1:503689724923:web:0c6196cdffc88905dc415e"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        firebaseDB = getDatabase(app);
+        firebaseRef = ref;
+        firebaseGet = get;
+        
+        console.log('Firebase initialized for main website');
+        
+        // Load products from Firebase
+        await loadProductsFromFirebase();
+        
+    } catch (error) {
+        console.error('Error initializing Firebase:', error);
+    }
+    
     // Load featured products
     loadFeaturedProducts();
     
@@ -16,6 +51,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add scroll animations
     initializeScrollAnimations();
 });
+
+// Load products from Firebase
+async function loadProductsFromFirebase() {
+    try {
+        if (!firebaseDB || !firebaseRef || !firebaseGet) {
+            console.log('Firebase not available, using empty product list');
+            return;
+        }
+        
+        const productsRef = firebaseRef(firebaseDB, 'products');
+        const snapshot = await firebaseGet(productsRef);
+        
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            updateProductsFromFirebase(data);
+            console.log('Products loaded from Firebase:', getAllProducts().length);
+        } else {
+            console.log('No products found in Firebase');
+        }
+    } catch (error) {
+        console.error('Error loading products from Firebase:', error);
+    }
+}
 
 // Load featured products
 function loadFeaturedProducts() {
