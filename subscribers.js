@@ -1,6 +1,19 @@
 // Newsletter Subscription System
 let subscribersDB, subscribersRef, subscribersPush, subscribersGet;
 
+// Initialize EmailJS
+function initializeEmailJS() {
+    try {
+        // Initialize EmailJS with your public key
+        emailjs.init({
+            publicKey: 'mV-dJXKqQ0D6cG8H9'
+        });
+        console.log('%c✅ EmailJS initialized', 'color: green;');
+    } catch (error) {
+        console.log('%c⚠️ EmailJS not available - notifications will be logged only', 'color: orange;');
+    }
+}
+
 // Initialize Firebase for subscribers
 async function initializeSubscriberSystem() {
     try {
@@ -25,6 +38,9 @@ async function initializeSubscriberSystem() {
         subscribersGet = get;
         
         console.log('%c✅ Subscriber System Initialized', 'color: green; font-weight: bold;');
+        
+        // Initialize EmailJS
+        initializeEmailJS();
         
         // Initialize form listener
         initializeSubscriptionForm();
@@ -148,7 +164,11 @@ async function notifySubscribersAboutNewProduct(productName, productDescription,
         
         if (subscribers.length === 0) {
             console.log('%c ℹ️ No active subscribers to notify', 'color: orange;');
-            return;
+            return {
+                success: false,
+                message: 'No active subscribers',
+                subscriberCount: 0
+            };
         }
         
         console.log('%c📧 Sending notifications to', 'color: blue;', subscribers.length, 'subscribers');
@@ -167,14 +187,32 @@ async function notifySubscribersAboutNewProduct(productName, productDescription,
         const notificationsRef = subscribersRef(subscribersDB, 'notifications');
         await subscribersPush(notificationsRef, notification);
         
-        // In production, you would integrate with EmailJS or a backend service here
-        // For now, we're logging that notification would be sent
-        console.log('%c✅ Notifications recorded for subscribers:', 'color: green;', subscribers.map(s => s.email));
+        // Send actual emails using EmailJS
+        let emailsSent = 0;
+        for (const subscriber of subscribers) {
+            try {
+                // Send email using EmailJS
+                await emailjs.send('service_fast_tech', 'template_new_product', {
+                    to_email: subscriber.email,
+                    product_name: productName,
+                    product_description: productDescription,
+                    product_price: productPrice,
+                    store_name: 'Fast Tech',
+                    store_link: window.location.origin
+                });
+                emailsSent++;
+                console.log('%c✉️ Email sent to:', 'color: green;', subscriber.email);
+            } catch (emailError) {
+                console.warn('%c⚠️ Failed to send email to', 'color: orange;', subscriber.email, emailError);
+            }
+        }
+        
+        console.log('%c✅ Notification process completed:', 'color: green;', `${emailsSent} emails sent out of ${subscribers.length} subscribers`);
         
         return {
             success: true,
-            message: `Notification sent to ${subscribers.length} subscribers about: ${productName}`,
-            subscriberCount: subscribers.length
+            message: `Notification sent to ${emailsSent} subscribers about: ${productName}`,
+            subscriberCount: emailsSent
         };
         
     } catch (error) {

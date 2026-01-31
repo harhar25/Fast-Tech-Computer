@@ -343,8 +343,8 @@ function createProductCard(product) {
                     <a href="product.html?id=${product.id}" class="btn-product btn-view">
                         <i class="bi bi-eye"></i> View
                     </a>
-                    <button class="btn-product btn-cart add-to-cart-btn" data-product-id="${product.id}">
-                        <i class="bi bi-cart-plus"></i> Add
+                    <button class="btn-product btn-cart" onclick="handleOrderClick('${product.name}')" data-product-id="${product.id}">
+                        <i class="bi bi-facebook"></i> Make an Order
                     </button>
                 </div>
             </div>

@@ -125,10 +125,24 @@ function displayProductDetails(product) {
     
     const specsHtml = Object.entries(product.specs).map(([key, value]) => {
         const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+        
+        // Handle nested objects and arrays
+        let displayValue = value;
+        if (typeof value === 'object' && value !== null) {
+            if (Array.isArray(value)) {
+                displayValue = value.join(', ');
+            } else {
+                // Convert nested object to readable format
+                displayValue = Object.entries(value)
+                    .map(([k, v]) => `${k}: ${v}`)
+                    .join(' | ');
+            }
+        }
+        
         return `
             <tr>
                 <td><strong>${label}:</strong></td>
-                <td>${value}</td>
+                <td>${displayValue}</td>
             </tr>
         `;
     }).join('');
