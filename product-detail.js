@@ -1,26 +1,98 @@
 // Product Detail Page JavaScript
 
-document.addEventListener('DOMContentLoaded', function() {
+// Firebase integration
+let firebaseDB, firebaseRef, firebaseGet;
+
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('%c📄 Product Detail Page - DOMContentLoaded', 'color: blue; font-weight: bold;');
+    
+    // Initialize Firebase and load products first
+    await initializeFirebaseForProductDetail();
+    
+    // Now load product details
     loadProductDetails();
+    
     initializeSearch();
 });
 
+// Initialize Firebase for product detail page
+async function initializeFirebaseForProductDetail() {
+    try {
+        console.log('%c🔄 Initializing Firebase for product detail page...', 'color: orange;');
+        const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js");
+        const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js");
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhy1IWM62djijn4vRUNmfYFTA3tGPY5tU",
+            authDomain: "fast-tech-computer.firebaseapp.com",
+            databaseURL: "https://fast-tech-computer-default-rtdb.firebaseio.com",
+            projectId: "fast-tech-computer",
+            storageBucket: "fast-tech-computer.firebasestorage.app",
+            messagingSenderId: "503689724923",
+            appId: "1:503689724923:web:0c6196cdffc88905dc415e"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        firebaseDB = getDatabase(app);
+        firebaseRef = ref;
+        firebaseGet = get;
+        
+        console.log('%c✅ Firebase initialized for product detail page', 'color: green; font-weight: bold;');
+        
+        // Load products from Firebase
+        console.log('%c🔄 Loading products from Firebase...', 'color: blue;');
+        const productsRef = firebaseRef(firebaseDB, 'products');
+        const snapshot = await firebaseGet(productsRef);
+        
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            console.log('%c✅ Products loaded from Firebase', 'color: green;');
+            
+            // Update the local products array from Firebase
+            updateProductsFromFirebase(data);
+            
+            const allProducts = getAllProducts();
+            console.log('%c✅ Total products available:', 'color: green;', allProducts.length);
+        } else {
+            console.log('%c⚠️ No products found in Firebase', 'color: orange;');
+        }
+    } catch (error) {
+        console.error('%c❌ Error initializing Firebase for product detail:', 'color: red; font-weight: bold;', error);
+    }
+}
+
+
+
 // Load product details
 function loadProductDetails() {
+    console.log('%c📦 loadProductDetails() called', 'color: blue;');
+    
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
     
+    console.log('%c🔍 Product ID from URL:', 'color: blue;', productId);
+    
     if (!productId) {
+        console.log('%c❌ No product ID provided in URL', 'color: red;');
         showProductNotFound();
         return;
     }
+    
+    console.log('%c🔍 Searching for product:', 'color: blue;', productId);
+    console.log('%c📋 Available products:', 'color: blue;', getAllProducts());
     
     const product = getProductById(productId);
     
     if (!product) {
+        console.error('%c❌ Product not found with ID:', 'color: red; font-weight: bold;', productId);
+        console.log('%c📊 Total products in system:', 'color: orange;', getAllProducts().length);
         showProductNotFound();
         return;
     }
+    
+    console.log('%c✅ Product found:', 'color: green; font-weight: bold;', product);
     
     displayProductDetails(product);
     loadRelatedProducts(product);
