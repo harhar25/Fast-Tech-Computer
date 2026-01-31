@@ -1026,28 +1026,11 @@
                 // Show loading indicator
                 showAlert('Adding product to Firebase...', 'info');
                 
-                // Save to Firebase
+                // Save to Firebase using push (creates automatic unique keys)
                 const categoryRef = window.firebaseRef(window.firebaseDB, `products/${newProduct.category}`);
-                const categorySnapshot = await window.firebaseGet(categoryRef);
+                const productRef = window.firebasePush(categoryRef, newProduct);
                 
-                let categoryProducts = [];
-                if (categorySnapshot.exists()) {
-                    const existingData = categorySnapshot.val();
-                    // Ensure we have an array, convert object to array if needed
-                    if (Array.isArray(existingData)) {
-                        categoryProducts = existingData;
-                    } else if (typeof existingData === 'object' && existingData !== null) {
-                        // Convert object to array
-                        categoryProducts = Object.values(existingData);
-                    } else {
-                        categoryProducts = [];
-                    }
-                }
-                
-                categoryProducts.push(newProduct);
-                await window.firebaseSet(categoryRef, categoryProducts);
-                
-                console.log('Product saved to Firebase');
+                console.log('Product saved to Firebase with ID:', productRef.key);
                 
                 // Also update local products array
                 currentProducts.push(newProduct);
