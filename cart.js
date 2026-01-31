@@ -200,6 +200,179 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Checkout functionality
+document.addEventListener('click', function(e) {
+    if (e.target.textContent.includes('Checkout') && e.target.classList.contains('btn-primary')) {
+        e.preventDefault();
+        
+        const cartItems = cart.getItems();
+        if (cartItems.length === 0) {
+            alert('Your cart is empty. Add some products before checkout.');
+            return;
+        }
+        
+        // Show checkout modal or redirect to checkout page
+        showCheckoutModal();
+    }
+});
+
+// Show checkout modal
+function showCheckoutModal() {
+    // Create checkout modal if it doesn't exist
+    let checkoutModal = document.getElementById('checkoutModal');
+    if (!checkoutModal) {
+        checkoutModal = createCheckoutModal();
+        document.body.appendChild(checkoutModal);
+    }
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(checkoutModal);
+    modal.show();
+}
+
+// Create checkout modal HTML
+function createCheckoutModal() {
+    const modalDiv = document.createElement('div');
+    modalDiv.className = 'modal fade';
+    modalDiv.id = 'checkoutModal';
+    modalDiv.setAttribute('tabindex', '-1');
+    modalDiv.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Checkout</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Order Summary</h6>
+                            <div id="checkoutItems"></div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <strong>Total:</strong>
+                                <strong>₱<span id="checkoutTotal">0.00</span></strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Shipping Information</h6>
+                            <form id="checkoutForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Full Name *</label>
+                                    <input type="text" class="form-control" id="fullName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phone *</label>
+                                    <input type="tel" class="form-control" id="phone" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Address *</label>
+                                    <textarea class="form-control" id="address" rows="2" required></textarea>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="processCheckout()">Place Order</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Populate checkout items
+    updateCheckoutModal();
+    
+    return modalDiv;
+}
+
+// Update checkout modal content
+function updateCheckoutModal() {
+    const cartItems = cart.getItems();
+    const checkoutItems = document.getElementById('checkoutItems');
+    const checkoutTotal = document.getElementById('checkoutTotal');
+    
+    if (checkoutItems) {
+        checkoutItems.innerHTML = cartItems.map(item => `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <strong>${item.name}</strong><br>
+                    <small>Quantity: ${item.quantity}</small>
+                </div>
+                <span>₱${(item.price * item.quantity).toFixed(2)}</span>
+            </div>
+        `).join('');
+    }
+    
+    if (checkoutTotal) {
+        checkoutTotal.textContent = cart.getTotal().toFixed(2);
+    }
+}
+
+// Process checkout
+function processCheckout() {
+    const form = document.getElementById('checkoutForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const orderData = {
+        items: cart.getItems(),
+        total: cart.getTotal(),
+        customer: {
+            fullName: document.getElementById('fullName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            address: document.getElementById('address').value
+        },
+        date: new Date().toISOString()
+    };
+    
+    // For demo purposes, just show success message
+    alert('Order placed successfully! Order ID: ' + Math.random().toString(36).substr(2, 9).toUpperCase());
+    
+    // Clear cart and close modals
+    cart.clear();
+    
+    // Close checkout modal
+    const checkoutModal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
+    if (checkoutModal) {
+        checkoutModal.hide();
+    }
+    
+    // Close cart modal
+    const cartModal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
+    if (cartModal) {
+        cartModal.hide();
+    }
+    
+    // Remove checkout modal from DOM
+    setTimeout(() => {
+        const modal = document.getElementById('checkoutModal');
+        if (modal) {
+            modal.remove();
+        }
+    }, 500);
+}
+
+// Fix modal backdrop issues
+document.addEventListener('hidden.bs.modal', function(e) {
+    // Remove any leftover backdrops
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => backdrop.remove());
+    
+    // Restore body classes
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+});
+
 // Quick add to cart from product cards
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('add-to-cart-btn')) {
