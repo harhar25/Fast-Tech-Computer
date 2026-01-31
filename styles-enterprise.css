@@ -484,30 +484,23 @@ body {
   transform: rotate(0deg) scale(1);
 }
 
-/* Tech Vibes Text Styling */
+/* Tech Vibes Text Styling - Clean and Beautiful */
 .cool-vibes-text {
-    background: linear-gradient(135deg, #00d4ff 0%, #0099ff 25%, #0066cc 50%, #003d7a 75%, #001f3f 100%);
-    background-size: 400% 400%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: techVibesGradient 6s ease infinite;
-    font-weight: 600;
-    text-shadow: 0 0 20px rgba(0, 153, 255, 0.3);
-    position: relative;
+    color: #e0f2fe;
+    font-weight: 500;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+    text-shadow: none;
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+    background-clip: unset;
+    animation: none;
 }
 
 .cool-vibes-text::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 102, 204, 0.2));
-    filter: blur(8px);
-    z-index: -1;
-    animation: techVibesGlow 4s ease-in-out infinite alternate;
+    display: none;
 }
 
 @keyframes techVibesGradient {
