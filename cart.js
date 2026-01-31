@@ -145,7 +145,7 @@ class ShoppingCart {
         });
 
         cartItems.innerHTML = html;
-        cartTotal.textContent = formatPrice(this.getTotal());
+        cartTotal.textContent = this.getTotal().toFixed(2);
     }
 
     // Show notification
