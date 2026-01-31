@@ -406,6 +406,9 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-plus-circle"></i> Add Product
                             </button>
+                            <button type="button" class="btn btn-success ms-2" onclick="addProduct()">
+                                <i class="bi bi-plus-circle"></i> Add Product (Manual)
+                            </button>
                             <button type="button" class="btn btn-secondary ms-2" onclick="showDashboardSection()">
                                 Cancel
                             </button>
@@ -545,9 +548,12 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            checkAuth();
-            initializeEventListeners();
-            editModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+            // Wait a bit for Firebase to load
+            setTimeout(() => {
+                checkAuth();
+                initializeEventListeners();
+                editModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+            }, 500);
         });
 
         // Check authentication
@@ -860,26 +866,59 @@
 
         // Add new product to Firebase
         async function addProduct() {
-            const newProduct = {
-                id: 'prod-' + Date.now(),
-                name: document.getElementById('newProductName').value,
-                brand: document.getElementById('newProductBrand').value,
-                category: document.getElementById('newProductCategory').value,
-                price: parseFloat(document.getElementById('newProductPrice').value),
-                description: document.getElementById('newProductDescription').value,
-                image: document.getElementById('newProductImage').value || 'https://via.placeholder.com/300x300/cccccc/ffffff?text=No+Image',
-                originalPrice: document.getElementById('newProductOriginalPrice').value ? parseFloat(document.getElementById('newProductOriginalPrice').value) : null,
-                badge: document.getElementById('newProductBadge').value,
-                inStock: true,
-                rating: 4.5,
-                reviews: 0,
-                specs: {}
-            };
+            console.log('Add product function called');
             
             try {
+                // Check if Firebase is available
+                if (!window.firebaseDB || !window.firebaseRef || !window.firebaseSet) {
+                    showAlert('Firebase not loaded yet. Please wait and try again.', 'warning');
+                    return;
+                }
+                
+                // Get form values
+                const name = document.getElementById('newProductName').value;
+                const brand = document.getElementById('newProductBrand').value;
+                const category = document.getElementById('newProductCategory').value;
+                const price = document.getElementById('newProductPrice').value;
+                const description = document.getElementById('newProductDescription').value;
+                const image = document.getElementById('newProductImage').value;
+                const originalPrice = document.getElementById('newProductOriginalPrice').value;
+                const badge = document.getElementById('newProductBadge').value;
+                
+                console.log('Form values:', { name, brand, category, price, description });
+                
+                // Validate required fields
+                if (!name || !brand || !category || !price || !description) {
+                    showAlert('Please fill in all required fields.', 'warning');
+                    return;
+                }
+                
+                const newProduct = {
+                    id: 'prod-' + Date.now(),
+                    name: name,
+                    brand: brand,
+                    category: category,
+                    price: parseFloat(price),
+                    description: description,
+                    image: image || 'https://via.placeholder.com/300x300/cccccc/ffffff?text=No+Image',
+                    originalPrice: originalPrice ? parseFloat(originalPrice) : null,
+                    badge: badge,
+                    inStock: true,
+                    rating: 4.5,
+                    reviews: 0,
+                    specs: {}
+                };
+                
+                console.log('New product object:', newProduct);
+                
+                // Show loading indicator
+                showAlert('Adding product to Firebase...', 'info');
+                
                 // Save to Firebase
                 const productRef = window.firebaseRef(window.firebaseDB, `products/${newProduct.category}/${newProduct.id}`);
                 await window.firebaseSet(productRef, newProduct);
+                
+                console.log('Product saved to Firebase');
                 
                 // Also update local products array
                 currentProducts.push(newProduct);
@@ -895,7 +934,7 @@
                 showAlert('Product added successfully to Firebase!', 'success');
             } catch (error) {
                 console.error('Error adding product to Firebase:', error);
-                showAlert('Error adding product. Please try again.', 'danger');
+                showAlert('Error adding product: ' + error.message, 'danger');
             }
         }
 
