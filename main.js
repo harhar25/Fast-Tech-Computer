@@ -5,6 +5,9 @@ let firebaseDB, firebaseRef, firebaseGet;
 
 // Initialize Firebase for main website
 document.addEventListener('DOMContentLoaded', async function() {
+    // Show loading state initially
+    showLoadingState();
+    
     // Load Firebase SDK
     try {
         const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js");
@@ -29,18 +32,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         console.log('Firebase initialized for main website');
         
-        // Load products from Firebase
+        // Load products from Firebase first, then display
         await loadProductsFromFirebase();
+        
+        // Now load featured and deal products from Firebase data
+        loadFeaturedProducts();
+        loadDealProducts();
         
     } catch (error) {
         console.error('Error initializing Firebase:', error);
+        showEmptyState();
     }
-    
-    // Load featured products
-    loadFeaturedProducts();
-    
-    // Load deal products
-    loadDealProducts();
     
     // Initialize search functionality
     initializeSearch();
@@ -51,6 +53,66 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Add scroll animations
     initializeScrollAnimations();
 });
+
+// Show loading state while Firebase loads
+function showLoadingState() {
+    const featuredContainer = document.getElementById('featuredProducts');
+    const dealContainer = document.getElementById('dealProducts');
+    
+    if (featuredContainer) {
+        featuredContainer.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Loading products from database...</p>
+            </div>
+        `;
+    }
+    
+    if (dealContainer) {
+        dealContainer.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Loading deals from database...</p>
+            </div>
+        `;
+    }
+}
+
+// Show empty state when no products exist
+function showEmptyState() {
+    const featuredContainer = document.getElementById('featuredProducts');
+    const dealContainer = document.getElementById('dealProducts');
+    
+    if (featuredContainer) {
+        featuredContainer.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-box display-1 text-muted mb-3"></i>
+                <h4>No Products Available</h4>
+                <p class="text-muted">Add products through the admin panel to see them here</p>
+                <a href="admin.html" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Products
+                </a>
+            </div>
+        `;
+    }
+    
+    if (dealContainer) {
+        dealContainer.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-tag display-1 text-muted mb-3"></i>
+                <h4>No Deals Available</h4>
+                <p class="text-muted">Add products with sale prices through the admin panel</p>
+                <a href="admin.html" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Products
+                </a>
+            </div>
+        `;
+    }
+}
 
 // Load products from Firebase
 async function loadProductsFromFirebase() {
@@ -69,6 +131,7 @@ async function loadProductsFromFirebase() {
             console.log('Products loaded from Firebase:', getAllProducts().length);
         } else {
             console.log('No products found in Firebase');
+            showEmptyState();
         }
     } catch (error) {
         console.error('Error loading products from Firebase:', error);

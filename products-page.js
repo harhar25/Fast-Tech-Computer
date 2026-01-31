@@ -4,6 +4,9 @@
 let firebaseDB, firebaseRef, firebaseGet;
 
 document.addEventListener('DOMContentLoaded', async function() {
+    // Show loading state initially
+    showProductsLoadingState();
+    
     // Initialize Firebase for products page
     await initializeFirebase();
     
@@ -70,11 +73,55 @@ async function loadProductsFromFirebase() {
             applyFilters();
         } else {
             console.log('No products found in Firebase');
-            displayProducts([]);
+            showProductsEmptyState();
         }
     } catch (error) {
         console.error('Error loading products from Firebase:', error);
         displayProducts([]);
+    }
+}
+
+// Show loading state for products page
+function showProductsLoadingState() {
+    const container = document.getElementById('productsGrid');
+    const resultCount = document.getElementById('resultCount');
+    
+    if (container) {
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Loading products from database...</p>
+            </div>
+        `;
+    }
+    
+    if (resultCount) {
+        resultCount.textContent = '0';
+    }
+}
+
+// Show empty state for products page
+function showProductsEmptyState() {
+    const container = document.getElementById('productsGrid');
+    const resultCount = document.getElementById('resultCount');
+    
+    if (container) {
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-box display-1 text-muted mb-3"></i>
+                <h4>No Products Available</h4>
+                <p class="text-muted">Add products through the admin panel to see them here</p>
+                <a href="admin.html" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Products
+                </a>
+            </div>
+        `;
+    }
+    
+    if (resultCount) {
+        resultCount.textContent = '0';
     }
 }
 
