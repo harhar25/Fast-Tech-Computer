@@ -394,15 +394,18 @@
                                 <textarea class="form-control" id="newProductSpecs" rows="4" placeholder='{"cores": "8", "clock": "3.5GHz", "cache": "16MB"}'></textarea>
                                 <small class="form-text text-muted">Enter product specifications in JSON format. Example: {"cores": "8", "clock": "3.5GHz", "cache": "16MB"}</small>
                             </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Image URL</label>
-                                    <input type="url" class="form-control" id="newProductImage" placeholder="https://example.com/image.jpg">
+                            <div class="mb-3">
+                                <label class="form-label">Product Image</label>
+                                <input type="file" class="form-control" id="newProductImageFile" accept="image/*" onchange="previewImage(this)">
+                                <input type="hidden" id="newProductImage" value="">
+                                <div id="imagePreview" class="mt-2" style="display: none;">
+                                    <img id="previewImg" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Original Price (Optional)</label>
-                                    <input type="number" class="form-control" id="newProductOriginalPrice" step="0.01">
-                                </div>
+                                <small class="form-text text-muted">Upload an image file (JPG, PNG, GIF). Max size: 5MB.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Original Price (Optional)</label>
+                                <input type="number" class="form-control" id="newProductOriginalPrice" step="0.01" placeholder="For sale items">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Badge (Optional)</label>
@@ -415,9 +418,6 @@
                             </div>
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-plus-circle"></i> Add Product
-                            </button>
-                            <button type="button" class="btn btn-success ms-2" onclick="addProduct()">
-                                <i class="bi bi-plus-circle"></i> Add Product (Manual)
                             </button>
                             <button type="button" class="btn btn-secondary ms-2" onclick="showDashboardSection()">
                                 Cancel
@@ -478,15 +478,18 @@
                             <textarea class="form-control" id="editProductSpecs" rows="4" placeholder='{"cores": "8", "clock": "3.5GHz", "cache": "16MB"}'></textarea>
                             <small class="form-text text-muted">Enter product specifications in JSON format. Example: {"cores": "8", "clock": "3.5GHz", "cache": "16MB"}</small>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Image URL</label>
-                                <input type="url" class="form-control" id="editProductImage">
+                        <div class="mb-3">
+                            <label class="form-label">Product Image</label>
+                            <input type="file" class="form-control" id="editProductImageFile" accept="image/*" onchange="previewEditImage(this)">
+                            <input type="hidden" id="editProductImage" value="">
+                            <div id="editImagePreview" class="mt-2" style="display: none;">
+                                <img id="editPreviewImg" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Original Price (Optional)</label>
-                                <input type="number" class="form-control" id="editProductOriginalPrice" step="0.01">
-                            </div>
+                            <small class="form-text text-muted">Upload a new image file or keep the current one.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Original Price (Optional)</label>
+                            <input type="number" class="form-control" id="editProductOriginalPrice" step="0.01" placeholder="For sale items">
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -889,6 +892,41 @@
             `).join('');
         }
 
+        // Image preview function
+        function previewImage(input) {
+            const file = input.files[0];
+            const preview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            const hiddenInput = document.getElementById('newProductImage');
+            
+            if (file) {
+                // Check file size (5MB limit)
+                if (file.size > 5 * 1024 * 1024) {
+                    showAlert('Image size must be less than 5MB', 'warning');
+                    input.value = '';
+                    return;
+                }
+                
+                // Check file type
+                if (!file.type.startsWith('image/')) {
+                    showAlert('Please select an image file', 'warning');
+                    input.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                    hiddenInput.value = e.target.result; // Store base64 image
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+                hiddenInput.value = '';
+            }
+        }
+
         // Add new product to Firebase
         async function addProduct() {
             console.log('Add product function called');
@@ -907,7 +945,7 @@
                 const price = document.getElementById('newProductPrice').value;
                 const description = document.getElementById('newProductDescription').value;
                 const specsText = document.getElementById('newProductSpecs').value;
-                const image = document.getElementById('newProductImage').value;
+                const image = document.getElementById('newProductImage').value; // This now contains base64 data
                 const originalPrice = document.getElementById('newProductOriginalPrice').value;
                 const badge = document.getElementById('newProductBadge').value;
                 
