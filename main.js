@@ -147,10 +147,26 @@ function loadFeaturedProducts() {
         return;
     }
     
+    console.log('✅ featuredProducts container found:', container);
+    
     // Get products from Firebase data
     const allProducts = getAllProducts();
     console.log('📦 All products available:', allProducts.length);
     console.log('📋 All products data:', allProducts);
+    
+    // If no products, show empty state
+    if (allProducts.length === 0) {
+        console.log('❌ No products found in Firebase data');
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-box display-1 text-muted mb-3"></i>
+                <h4>No Featured Products</h4>
+                <p class="text-muted">Featured products will appear here once added by the administrator</p>
+            </div>
+        `;
+        container.style.display = 'block';
+        return;
+    }
     
     // Filter for featured products (products with badge "new", "hot", or no badge)
     const featuredProducts = allProducts.filter(product => {
@@ -178,6 +194,10 @@ function loadFeaturedProducts() {
         }).join('');
         console.log('✅ Featured products displayed');
     }
+    
+    // Ensure container is visible
+    container.style.display = 'block';
+    container.style.visibility = 'visible';
 }
 
 // Load deal products
