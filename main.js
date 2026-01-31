@@ -146,18 +146,29 @@ async function loadProductsFromFirebase() {
 
 // Load featured products
 function loadFeaturedProducts() {
+    console.log('=== LOADING FEATURED PRODUCTS ===');
     const container = document.getElementById('featuredProducts');
-    if (!container) return;
+    if (!container) {
+        console.log('❌ featuredProducts container not found');
+        return;
+    }
     
     // Get products from Firebase data
     const allProducts = getAllProducts();
+    console.log('📦 All products available:', allProducts.length);
+    console.log('📋 All products data:', allProducts);
     
     // Filter for featured products (products with badge "new", "hot", or no badge)
-    const featuredProducts = allProducts.filter(product => 
-        !product.badge || product.badge === 'new' || product.badge === 'hot'
-    ).slice(0, 8);
+    const featuredProducts = allProducts.filter(product => {
+        console.log(`🔍 Checking product: ${product.name}, badge: ${product.badge}`);
+        return !product.badge || product.badge === 'new' || product.badge === 'hot';
+    }).slice(0, 8);
+    
+    console.log('⭐ Featured products found:', featuredProducts.length);
+    console.log('⭐ Featured products data:', featuredProducts);
     
     if (featuredProducts.length === 0) {
+        console.log('❌ No featured products, showing empty state');
         container.innerHTML = `
             <div class="col-12 text-center py-5">
                 <i class="bi bi-box display-1 text-muted mb-3"></i>
@@ -169,13 +180,23 @@ function loadFeaturedProducts() {
             </div>
         `;
     } else {
-        container.innerHTML = featuredProducts.map(product => createProductCard(product)).join('');
+        console.log('✅ Creating product cards for featured products');
+        container.innerHTML = featuredProducts.map(product => {
+            console.log('🎨 Creating card for:', product.name);
+            return createProductCard(product);
+        }).join('');
+        console.log('✅ Featured products displayed');
     }
 }
 
 // Load deal products
 function loadDealProducts() {
+    console.log('=== LOADING DEAL PRODUCTS ===');
     const container = document.getElementById('dealProducts');
+    if (!container) {
+        console.log('❌ dealProducts container not found');
+        return;
+    }
     if (!container) return;
     
     // Get products from Firebase data
