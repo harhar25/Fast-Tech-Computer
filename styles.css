@@ -387,6 +387,18 @@ body {
     }
 }
 
+/* Category Grid Base Styles */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.category-grid > div {
+  width: 100%;
+}
+
 /* Responsive Design Fixes */
 @media (max-width: 1024px) {
   .products-grid {

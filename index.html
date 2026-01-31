@@ -1,100 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-- Sales reports and analytics- Order management- Inventory tracking- Product image upload functionality- User authentication system- Backend integration for persistent storage## Future Enhancements- **Authentication**: Simple demo login (can be enhanced with backend)- **Architecture**: Client-side product management- **Storage**: Browser localStorage- **Framework**: Bootstrap 5.3.0## Technical Details- `styles-enterprise.css` - Styling- `products.js` - Product database and utilities- `admin.js` - Admin functionality and logic- `admin.html` - Admin dashboard UI## File Structure   - **Logout**: Exit admin panel   - **Add Product**: Create new products   - **Products**: Manage existing products   - **Overview**: View dashboard statistics4. Navigate using the sidebar menu:3. Login with demo credentials (admin / admin123)2. Click the "Admin" link in the navigation bar1. Open the main website (index.html)## How to Access- Changes affect the entire store immediately- Products are preserved across browser sessions- All changes are saved to localStorage### 4. **Data Persistence**- Confirmation dialogs to prevent accidental deletion  - Delete button in edit modal  - Quick delete from table view- Two deletion methods:- Remove products from inventory#### Delete Products- Real-time image preview  - Stock status  - Category  - Image URL  - Price  - Description- Change any product detail:- Click "Edit" button to modify existing products#### Edit Products- Form validation- Image preview before adding  - Badge (Hot, Sale, New)  - Stock status  - Rating  - Product image URL  - Description  - Brand  - Price (current and original)  - Category (Processors, Graphics Cards, Memory, Storage, Motherboards, Power Supplies, Cooling, Cases)  - Product name- Create new products with full details:#### Add Products- Quick action buttons for editing and deleting- See product details: name, category, price, stock status- Search products by name or ID- Browse all products in a table format#### View Products### 3. **Product Management**- Calculate total inventory value- Track number of categories- See in-stock count- View total number of products### 2. **Dashboard Overview**- Session persistence using localStorage- Demo Password: `admin123`- Demo Username: `admin`- Secure login system with demo credentials### 1. **Admin Login**The admin dashboard allows administrators to manage products with the following features:## Admin Features<head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fast Tech - Premium Computer Parts Store</title>
@@ -185,8 +91,8 @@
     <section class="category-section">
         <div class="container">
             <h2 class="section-title">Shop by Category</h2>
-            <div class="category-grid">
-                <div class="col-md-3">
+            <div class="row category-grid">
+                <div class="col-md-6 col-lg-3">
                     <div class="category-card">
                         <div class="category-icon">
                             <i class="bi bi-cpu"></i>
@@ -196,7 +102,7 @@
                         <a href="products.html?category=processors" class="category-btn">Shop Now</a>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6 col-lg-3">
                     <div class="category-card">
                         <div class="category-icon">
                             <i class="bi bi-gpu"></i>
@@ -206,7 +112,7 @@
                         <a href="products.html?category=graphics-cards" class="category-btn">Shop Now</a>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6 col-lg-3">
                     <div class="category-card">
                         <div class="category-icon">
                             <i class="bi bi-memory"></i>
@@ -216,7 +122,7 @@
                         <a href="products.html?category=memory" class="category-btn">Shop Now</a>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6 col-lg-3">
                     <div class="category-card">
                         <div class="category-icon">
                             <i class="bi bi-hdd"></i>
@@ -235,7 +141,7 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Featured Products</h2>
-                <p class="section-subtitle">Handpicked premium components for ultimate performance</p>
+                <p class="section-subtitle subtitle-fire">Handpicked premium components for ultimate performance</p>
             </div>
             <div class="products-grid" id="featuredProducts">
                 <!-- Products will be loaded here -->
@@ -287,7 +193,7 @@
                 <div class="col-md-4">
                     <h5>Contact Info</h5>
                     <p><i class="bi bi-telephone"></i>+639920627047</p>
-                    <p><i class="bi bi-envelope"></i> Email ni Fact Tech@gmail.com</p>
+                    <p><i class="bi bi-envelope"></i> Email ni Fast Tech@gmail.com</p>
                 </div>
                 <div class="col-md-4">
                     <h5>Follow Us</h5>
