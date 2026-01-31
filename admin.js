@@ -61,8 +61,12 @@ function handleLogin(e) {
 
 // Show Dashboard
 function showDashboard() {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('dashboardScreen').style.display = 'flex';
+    const loginScreen = document.getElementById('loginScreen');
+    const dashboardScreen = document.getElementById('dashboardScreen');
+    
+    if (loginScreen) loginScreen.classList.add('hidden');
+    if (dashboardScreen) dashboardScreen.classList.remove('hidden');
+    
     document.getElementById('adminName').textContent = localStorage.getItem('adminUsername') || 'Admin';
     
     loadAllProducts();
@@ -345,9 +349,16 @@ function logout() {
     if (confirm('Are you sure you want to logout?')) {
         localStorage.removeItem('adminLoggedIn');
         localStorage.removeItem('adminUsername');
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('dashboardScreen').style.display = 'none';
-        document.getElementById('loginForm').reset();
+        
+        const loginScreen = document.getElementById('loginScreen');
+        const dashboardScreen = document.getElementById('dashboardScreen');
+        
+        if (loginScreen) loginScreen.classList.remove('hidden');
+        if (dashboardScreen) dashboardScreen.classList.add('hidden');
+        
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) loginForm.reset();
+        
         currentEditingProductId = null;
     }
 }
