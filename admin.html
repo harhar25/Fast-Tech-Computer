@@ -138,6 +138,19 @@
             border-radius: 10px;
         }
         
+        /* Search enhancements */
+        .search-highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        
+        .product-card .search-match {
+            border: 2px solid #007bff;
+            background-color: #f8f9ff;
+        }
+        
         /* Hide login when dashboard is shown */
         .dashboard-active .login-container {
             display: none;
@@ -311,7 +324,12 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2">Product Management</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <input type="text" class="form-control me-2" id="productSearch" placeholder="Search products..." style="width: 200px;">
+                        <div class="input-group me-3" style="width: 250px;">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="productSearch" placeholder="Search products...">
+                        </div>
                         <button class="btn btn-primary" onclick="showAddProductSection()">
                             <i class="bi bi-plus"></i> Add Product
                         </button>
@@ -481,6 +499,39 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+        import { getDatabase, ref, set, get, push, remove, update } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhy1IWM62djijn4vRUNmfYFTA3tGPY5tU",
+            authDomain: "fast-tech-computer.firebaseapp.com",
+            projectId: "fast-tech-computer",
+            storageBucket: "fast-tech-computer.firebasestorage.app",
+            messagingSenderId: "503689724923",
+            appId: "1:503689724923:web:0c6196cdffc88905dc415e",
+            measurementId: "G-22CNV0786G"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+        
+        // Make Firebase available globally
+        window.firebaseDB = database;
+        window.firebaseRef = ref;
+        window.firebaseSet = set;
+        window.firebaseGet = get;
+        window.firebasePush = push;
+        window.firebaseRemove = remove;
+        window.firebaseUpdate = update;
+    </script>
+    
     <script src="products.js"></script>
     <script>
         // Admin credentials
@@ -626,15 +677,54 @@
             document.querySelector('.sidebar .nav-link[data-section="add-product"]').classList.add('active');
         }
 
-        // Load products
-        function loadProducts() {
-            currentProducts = getAllProducts();
-            displayProducts();
-            updateDashboardStats();
+        // Load products from Firebase
+        async function loadProducts() {
+            try {
+                const productsRef = window.firebaseRef(window.firebaseDB, 'products');
+                const snapshot = await window.firebaseGet(productsRef);
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    currentProducts = [];
+                    
+                    // Convert Firebase object to array
+                    Object.keys(data).forEach(category => {
+                        if (Array.isArray(data[category])) {
+                            data[category].forEach(product => {
+                                currentProducts.push(product);
+                            });
+                        }
+                    });
+                } else {
+                    // If no data in Firebase, use local products as fallback and sync to Firebase
+                    currentProducts = getAllProducts();
+                    await syncProductsToFirebase();
+                }
+                
+                displayProducts();
+                updateDashboardStats();
+            } catch (error) {
+                console.error('Error loading products from Firebase:', error);
+                // Fallback to local products
+                currentProducts = getAllProducts();
+                displayProducts();
+                updateDashboardStats();
+            }
+        }
+        
+        // Sync local products to Firebase
+        async function syncProductsToFirebase() {
+            try {
+                const productsRef = window.firebaseRef(window.firebaseDB, 'products');
+                await window.firebaseSet(productsRef, products);
+                console.log('Products synced to Firebase');
+            } catch (error) {
+                console.error('Error syncing products to Firebase:', error);
+            }
         }
 
         // Display products
-        function displayProducts(products = currentProducts) {
+        function displayProducts(products = currentProducts, searchTerm = '') {
             const container = document.getElementById('productsList');
             
             if (products.length === 0) {
@@ -642,49 +732,100 @@
                 return;
             }
             
-            container.innerHTML = products.map(product => `
-                <div class="product-card">
-                    <div class="row align-items-center">
-                        <div class="col-md-2">
-                            <img src="${product.image}" alt="${product.name}" class="product-image">
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="mb-1">${product.name}</h6>
-                            <p class="text-muted mb-1 small">${product.description}</p>
-                            <span class="badge bg-secondary badge-category">${product.category}</span>
-                            <span class="badge bg-info badge-category">${product.brand}</span>
-                            ${product.badge ? `<span class="badge bg-warning badge-category">${product.badge}</span>` : ''}
-                        </div>
-                        <div class="col-md-2">
-                            <div class="text-end">
-                                <h6 class="mb-0">$${product.price}</h6>
-                                ${product.originalPrice ? `<small class="text-muted"><del>$${product.originalPrice}</del></small>` : ''}
+            // Function to highlight search term
+            function highlightText(text, term) {
+                if (!term) return text;
+                const regex = new RegExp(`(${term})`, 'gi');
+                return text.replace(regex, '<span class="search-highlight">$1</span>');
+            }
+            
+            container.innerHTML = products.map(product => {
+                const isSearchMatch = searchTerm && (
+                    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    product.category.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                
+                return `
+                    <div class="product-card ${isSearchMatch ? 'search-match' : ''}">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                <img src="${product.image}" alt="${product.name}" class="product-image">
                             </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="text-end">
-                                <button class="btn btn-sm btn-outline-primary btn-action" onclick="editProduct('${product.id}')">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteProduct('${product.id}')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                            <div class="col-md-6">
+                                <h6 class="mb-1">${highlightText(product.name, searchTerm)}</h6>
+                                <p class="text-muted mb-1 small">${highlightText(product.description, searchTerm)}</p>
+                                <span class="badge bg-secondary badge-category">${highlightText(product.category, searchTerm)}</span>
+                                <span class="badge bg-info badge-category">${highlightText(product.brand, searchTerm)}</span>
+                                ${product.badge ? `<span class="badge bg-warning badge-category">${product.badge}</span>` : ''}
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-end">
+                                    <h6 class="mb-0">$${product.price}</h6>
+                                    ${product.originalPrice ? `<small class="text-muted"><del>$${product.originalPrice}</del></small>` : ''}
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary btn-action" onclick="editProduct('${product.id}')">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteProduct('${product.id}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Filter products
         function filterProducts(searchTerm) {
+            if (searchTerm.trim() === '') {
+                displayProducts(currentProducts);
+                return;
+            }
+            
             const filtered = currentProducts.filter(product => 
                 product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 product.category.toLowerCase().includes(searchTerm.toLowerCase())
             );
-            displayProducts(filtered);
+            
+            displayProducts(filtered, searchTerm);
+            
+            // Show search result count
+            if (filtered.length === 0) {
+                document.getElementById('productsList').innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-search display-1 text-muted mb-3"></i>
+                        <h4>No products found</h4>
+                        <p class="text-muted">No products match your search for "${searchTerm}"</p>
+                        <button class="btn btn-outline-primary" onclick="clearSearch()">Clear Search</button>
+                    </div>
+                `;
+            } else {
+                // Add search result indicator
+                const resultIndicator = document.createElement('div');
+                resultIndicator.className = 'alert alert-info mb-3';
+                resultIndicator.innerHTML = `
+                    <i class="bi bi-info-circle"></i> Found ${filtered.length} product${filtered.length !== 1 ? 's' : ''} matching "${searchTerm}"
+                    <button class="btn btn-sm btn-outline-secondary float-end" onclick="clearSearch()">Clear</button>
+                `;
+                
+                const container = document.getElementById('productsList');
+                container.insertBefore(resultIndicator, container.firstChild);
+            }
+        }
+        
+        // Clear search
+        function clearSearch() {
+            document.getElementById('productSearch').value = '';
+            displayProducts(currentProducts);
         }
 
         // Update dashboard statistics
@@ -717,8 +858,8 @@
             `).join('');
         }
 
-        // Add new product
-        function addProduct() {
+        // Add new product to Firebase
+        async function addProduct() {
             const newProduct = {
                 id: 'prod-' + Date.now(),
                 name: document.getElementById('newProductName').value,
@@ -735,21 +876,27 @@
                 specs: {}
             };
             
-            // Add to the appropriate category
-            if (!products[newProduct.category]) {
-                products[newProduct.category] = [];
+            try {
+                // Save to Firebase
+                const productRef = window.firebaseRef(window.firebaseDB, `products/${newProduct.category}/${newProduct.id}`);
+                await window.firebaseSet(productRef, newProduct);
+                
+                // Also update local products array
+                currentProducts.push(newProduct);
+                
+                // Reload and show success message
+                await loadProducts();
+                showDashboardSection();
+                
+                // Reset form
+                document.getElementById('addProductForm').reset();
+                
+                // Show success alert
+                showAlert('Product added successfully to Firebase!', 'success');
+            } catch (error) {
+                console.error('Error adding product to Firebase:', error);
+                showAlert('Error adding product. Please try again.', 'danger');
             }
-            products[newProduct.category].push(newProduct);
-            
-            // Reload and show success message
-            loadProducts();
-            showDashboardSection();
-            
-            // Reset form
-            document.getElementById('addProductForm').reset();
-            
-            // Show success alert
-            showAlert('Product added successfully!', 'success');
         }
 
         // Edit product
@@ -773,8 +920,8 @@
             editModal.show();
         }
 
-        // Update product
-        function updateProduct() {
+        // Update product in Firebase
+        async function updateProduct() {
             const productId = document.getElementById('editProductId').value;
             const productIndex = currentProducts.findIndex(p => p.id === productId);
             
@@ -793,38 +940,57 @@
                 inStock: document.getElementById('editProductInStock').value === 'true'
             };
             
-            // Update in the products object
-            const categoryProducts = products[updatedProduct.category];
-            const categoryIndex = categoryProducts.findIndex(p => p.id === productId);
-            if (categoryIndex !== -1) {
-                categoryProducts[categoryIndex] = updatedProduct;
+            try {
+                // Update in Firebase
+                const productRef = window.firebaseRef(window.firebaseDB, `products/${updatedProduct.category}/${productId}`);
+                await window.firebaseSet(productRef, updatedProduct);
+                
+                // If category changed, remove from old category
+                if (currentProducts[productIndex].category !== updatedProduct.category) {
+                    const oldProductRef = window.firebaseRef(window.firebaseDB, `products/${currentProducts[productIndex].category}/${productId}`);
+                    await window.firebaseRemove(oldProductRef);
+                }
+                
+                // Update local products array
+                currentProducts[productIndex] = updatedProduct;
+                
+                // Reload and close modal
+                await loadProducts();
+                editModal.hide();
+                
+                showAlert('Product updated successfully in Firebase!', 'success');
+            } catch (error) {
+                console.error('Error updating product in Firebase:', error);
+                showAlert('Error updating product. Please try again.', 'danger');
             }
-            
-            // Reload and close modal
-            loadProducts();
-            editModal.hide();
-            
-            showAlert('Product updated successfully!', 'success');
         }
 
-        // Delete product
-        function deleteProduct(productId) {
+        // Delete product from Firebase
+        async function deleteProduct(productId) {
             if (!confirm('Are you sure you want to delete this product?')) return;
             
             const product = currentProducts.find(p => p.id === productId);
             if (!product) return;
             
-            // Remove from the products object
-            const categoryProducts = products[product.category];
-            const categoryIndex = categoryProducts.findIndex(p => p.id === productId);
-            if (categoryIndex !== -1) {
-                categoryProducts.splice(categoryIndex, 1);
+            try {
+                // Remove from Firebase
+                const productRef = window.firebaseRef(window.firebaseDB, `products/${product.category}/${productId}`);
+                await window.firebaseRemove(productRef);
+                
+                // Remove from local products array
+                const index = currentProducts.findIndex(p => p.id === productId);
+                if (index !== -1) {
+                    currentProducts.splice(index, 1);
+                }
+                
+                // Reload
+                await loadProducts();
+                
+                showAlert('Product deleted successfully from Firebase!', 'success');
+            } catch (error) {
+                console.error('Error deleting product from Firebase:', error);
+                showAlert('Error deleting product. Please try again.', 'danger');
             }
-            
-            // Reload
-            loadProducts();
-            
-            showAlert('Product deleted successfully!', 'success');
         }
 
         // Show alert
@@ -847,10 +1013,10 @@
             }, 3000);
         }
 
-        // Refresh data
-        function refreshData() {
-            loadProducts();
-            showAlert('Data refreshed!', 'info');
+        // Refresh data from Firebase
+        async function refreshData() {
+            await loadProducts();
+            showAlert('Data refreshed from Firebase!', 'info');
         }
 
         // Logout
