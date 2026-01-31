@@ -48,6 +48,42 @@
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
+        
+        /* Admin Panel Search Bar Styling */
+        .btn-toolbar .input-group {
+            display: flex;
+            align-items: stretch;
+        }
+        
+        .btn-toolbar .input-group-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #495057;
+            border: 1px solid #495057;
+            color: white;
+            padding: 0 0.75rem;
+        }
+        
+        .btn-toolbar .form-control {
+            height: 38px;
+            border: 1px solid #ced4da;
+            border-left: none;
+        }
+        
+        .btn-toolbar .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-left: none;
+        }
+        
+        .btn-toolbar .btn {
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 1rem;
+        }
         .btn-login {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -330,10 +366,10 @@
                     <h1 class="h2">Product Management</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <div class="input-group me-3" style="width: 250px;">
-                            <span class="input-group-text">
+                            <span class="input-group-text bg-dark text-light">
                                 <i class="bi bi-search"></i>
                             </span>
-                            <input type="text" class="form-control" id="productSearch" placeholder="Search products...">
+                            <input type="text" class="form-control bg-dark text-light" id="productSearch" placeholder="Search products...">
                         </div>
                         <button class="btn btn-primary" onclick="showAddProductSection()">
                             <i class="bi bi-plus"></i> Add Product
@@ -990,8 +1026,16 @@
                 showAlert('Adding product to Firebase...', 'info');
                 
                 // Save to Firebase
-                const productRef = window.firebaseRef(window.firebaseDB, `products/${newProduct.category}/${newProduct.id}`);
-                await window.firebaseSet(productRef, newProduct);
+                const categoryRef = window.firebaseRef(window.firebaseDB, `products/${newProduct.category}`);
+                const categorySnapshot = await window.firebaseGet(categoryRef);
+                
+                let categoryProducts = [];
+                if (categorySnapshot.exists()) {
+                    categoryProducts = categorySnapshot.val() || [];
+                }
+                
+                categoryProducts.push(newProduct);
+                await window.firebaseSet(categoryRef, categoryProducts);
                 
                 console.log('Product saved to Firebase');
                 
@@ -1068,15 +1112,40 @@
             };
             
             try {
-                // Update in Firebase
-                const productRef = window.firebaseRef(window.firebaseDB, `products/${updatedProduct.category}/${productId}`);
-                await window.firebaseSet(productRef, updatedProduct);
+                // Update in Firebase - handle category change
+                const oldCategory = currentProducts[productIndex].category;
+                const newCategory = updatedProduct.category;
                 
                 // If category changed, remove from old category
-                if (currentProducts[productIndex].category !== updatedProduct.category) {
-                    const oldProductRef = window.firebaseRef(window.firebaseDB, `products/${currentProducts[productIndex].category}/${productId}`);
-                    await window.firebaseRemove(oldProductRef);
+                if (oldCategory !== newCategory) {
+                    const oldCategoryRef = window.firebaseRef(window.firebaseDB, `products/${oldCategory}`);
+                    const oldCategorySnapshot = await window.firebaseGet(oldCategoryRef);
+                    
+                    if (oldCategorySnapshot.exists()) {
+                        const oldCategoryProducts = oldCategorySnapshot.val() || [];
+                        const updatedOldCategory = oldCategoryProducts.filter(p => p.id !== productId);
+                        await window.firebaseSet(oldCategoryRef, updatedOldCategory);
+                    }
                 }
+                
+                // Update in new category
+                const newCategoryRef = window.firebaseRef(window.firebaseDB, `products/${newCategory}`);
+                const newCategorySnapshot = await window.firebaseGet(newCategoryRef);
+                
+                let categoryProducts = [];
+                if (newCategorySnapshot.exists()) {
+                    categoryProducts = newCategorySnapshot.val() || [];
+                }
+                
+                // Find and update the product in the category array
+                const productIndexInCategory = categoryProducts.findIndex(p => p.id === productId);
+                if (productIndexInCategory !== -1) {
+                    categoryProducts[productIndexInCategory] = updatedProduct;
+                } else {
+                    categoryProducts.push(updatedProduct);
+                }
+                
+                await window.firebaseSet(newCategoryRef, categoryProducts);
                 
                 // Update local products array
                 currentProducts[productIndex] = updatedProduct;
@@ -1101,8 +1170,14 @@
             
             try {
                 // Remove from Firebase
-                const productRef = window.firebaseRef(window.firebaseDB, `products/${product.category}/${productId}`);
-                await window.firebaseRemove(productRef);
+                const categoryRef = window.firebaseRef(window.firebaseDB, `products/${product.category}`);
+                const categorySnapshot = await window.firebaseGet(categoryRef);
+                
+                if (categorySnapshot.exists()) {
+                    const categoryProducts = categorySnapshot.val() || [];
+                    const updatedCategoryProducts = categoryProducts.filter(p => p.id !== productId);
+                    await window.firebaseSet(categoryRef, updatedCategoryProducts);
+                }
                 
                 // Remove from local products array
                 const index = currentProducts.findIndex(p => p.id === productId);
