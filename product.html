@@ -35,10 +35,10 @@
                 </ul>
                 <div class="d-flex align-items-center">
                     <div class="input-group me-3" style="width: 250px;">
-                        <input type="text" class="form-control" placeholder="Search products..." id="searchInput">
-                        <button class="btn btn-outline-light" type="button">
+                        <span class="input-group-text bg-dark border-dark text-light">
                             <i class="bi bi-search"></i>
-                        </button>
+                        </span>
+                        <input type="text" class="form-control bg-dark border-dark text-light" placeholder="Search products..." id="searchInput">
                     </div>
                     <button class="btn btn-outline-light position-relative me-2" id="cartBtn">
                         <i class="bi bi-cart3"></i>
@@ -151,5 +151,97 @@
     <script src="products.js"></script>
     <script src="cart.js"></script>
     <script src="product-detail.js"></script>
+    
+    <!-- Firebase Integration for Search -->
+    <script type="module">
+        // Firebase integration for search functionality
+        let firebaseDB, firebaseRef, firebaseGet;
+        
+        // Initialize Firebase
+        try {
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js");
+            const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js");
+            
+            const firebaseConfig = {
+                apiKey: "AIzaSyDhy1IWM62djijn4vRUNmfYFTA3tGPY5tU",
+                authDomain: "fast-tech-computer.firebaseapp.com",
+                databaseURL: "https://fast-tech-computer-default-rtdb.firebaseio.com",
+                projectId: "fast-tech-computer",
+                storageBucket: "fast-tech-computer.firebasestorage.app",
+                messagingSenderId: "503689724923",
+                appId: "1:503689724923:web:0c6196cdffc88905dc415e"
+            };
+            
+            const app = initializeApp(firebaseConfig);
+            firebaseDB = getDatabase(app);
+            firebaseRef = ref;
+            firebaseGet = get;
+        } catch (error) {
+            console.error('Error initializing Firebase for search:', error);
+        }
+        
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', async function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            
+            if (searchTerm.length < 2) {
+                // Clear any previous search results
+                return;
+            }
+            
+            try {
+                if (!firebaseDB || !firebaseRef || !firebaseGet) {
+                    console.log('Firebase not available for search');
+                    return;
+                }
+                
+                const productsRef = firebaseRef(firebaseDB, 'products');
+                const snapshot = await firebaseGet(productsRef);
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const allProducts = [];
+                    
+                    // Convert Firebase data to flat array
+                    Object.keys(data).forEach(category => {
+                        if (Array.isArray(data[category])) {
+                            data[category].forEach(product => {
+                                allProducts.push(product);
+                            });
+                        }
+                    });
+                    
+                    // Filter products based on search term
+                    const filteredProducts = allProducts.filter(product => 
+                        product.name.toLowerCase().includes(searchTerm) ||
+                        product.description.toLowerCase().includes(searchTerm) ||
+                        product.brand.toLowerCase().includes(searchTerm) ||
+                        product.category.toLowerCase().includes(searchTerm)
+                    );
+                    
+                    // Redirect to products page with search results
+                    if (filteredProducts.length > 0) {
+                        const searchParams = new URLSearchParams();
+                        searchParams.set('search', searchTerm);
+                        window.location.href = `products.html?${searchParams.toString()}`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error searching products:', error);
+            }
+        });
+        
+        // Handle Enter key press
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                if (searchTerm.length >= 2) {
+                    const searchParams = new URLSearchParams();
+                    searchParams.set('search', searchTerm);
+                    window.location.href = `products.html?${searchParams.toString()}`;
+                }
+            }
+        });
+    </script>
 </body>
 </html>

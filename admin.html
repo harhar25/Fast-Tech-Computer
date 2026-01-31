@@ -229,6 +229,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="clearAllProducts()">
+                            <i class="bi bi-trash"></i> Clear All Products
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#" onclick="logout()">
                             <i class="bi bi-box-arrow-right"></i> Logout
                         </a>
@@ -712,30 +717,39 @@
                         }
                     });
                 } else {
-                    // If no data in Firebase, use local products as fallback and sync to Firebase
-                    currentProducts = getAllProducts();
-                    await syncProductsToFirebase();
+                    // If no data in Firebase, start with empty products
+                    currentProducts = [];
+                    console.log('No products in Firebase, starting with empty database');
                 }
                 
                 displayProducts();
                 updateDashboardStats();
             } catch (error) {
                 console.error('Error loading products from Firebase:', error);
-                // Fallback to local products
-                currentProducts = getAllProducts();
+                // Start with empty products if Firebase fails
+                currentProducts = [];
                 displayProducts();
                 updateDashboardStats();
             }
         }
         
-        // Sync local products to Firebase
-        async function syncProductsToFirebase() {
+        // Clear all products from Firebase (for testing)
+        async function clearAllProducts() {
+            if (!confirm('Are you sure you want to delete ALL products from Firebase? This action cannot be undone.')) {
+                return;
+            }
+            
             try {
                 const productsRef = window.firebaseRef(window.firebaseDB, 'products');
-                await window.firebaseSet(productsRef, products);
-                console.log('Products synced to Firebase');
+                await window.firebaseSet(productsRef, null);
+                
+                // Reload products
+                await loadProducts();
+                
+                showAlert('All products cleared from Firebase!', 'success');
             } catch (error) {
-                console.error('Error syncing products to Firebase:', error);
+                console.error('Error clearing products from Firebase:', error);
+                showAlert('Error clearing products: ' + error.message, 'danger');
             }
         }
 

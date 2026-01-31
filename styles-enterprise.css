@@ -42,7 +42,8 @@ body {
   background: rgba(15, 23, 42, 0.95) !important;
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--gray-200);
-  padding: 1rem 0;
+  z-index: 1030;
+  position: relative;
   transition: all var(--transition-normal);
 }
 
@@ -262,6 +263,58 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+/* Search Results Styling */
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  z-index: 1020;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 5px;
+}
+
+.search-result-item {
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-100);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+}
+
+.search-result-item:hover {
+  background: var(--gray-50);
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  margin-right: 1rem;
+  border-radius: var(--radius-lg);
+}
+
+.search-result-item h6 {
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.search-result-item small {
+  color: var(--gray-600);
+  font-size: 0.875rem;
 }
 
 .product-card:hover {
