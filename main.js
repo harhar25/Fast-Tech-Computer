@@ -92,10 +92,7 @@ function showEmptyState() {
             <div class="col-12 text-center py-5">
                 <i class="bi bi-box display-1 text-muted mb-3"></i>
                 <h4>No Products Available</h4>
-                <p class="text-muted">Add products through the admin panel to see them here</p>
-                <a href="admin.html" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Add Products
-                </a>
+                <p class="text-muted">Products will appear here once added by the administrator</p>
             </div>
         `;
     }
@@ -105,10 +102,7 @@ function showEmptyState() {
             <div class="col-12 text-center py-5">
                 <i class="bi bi-tag display-1 text-muted mb-3"></i>
                 <h4>No Deals Available</h4>
-                <p class="text-muted">Add products with sale prices through the admin panel</p>
-                <a href="admin.html" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Add Products
-                </a>
+                <p class="text-muted">Special deals will appear here once added by the administrator</p>
             </div>
         `;
     }
@@ -173,10 +167,7 @@ function loadFeaturedProducts() {
             <div class="col-12 text-center py-5">
                 <i class="bi bi-box display-1 text-muted mb-3"></i>
                 <h4>No Featured Products</h4>
-                <p class="text-muted">Add products through the admin panel to see featured items here</p>
-                <a href="admin.html" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Add Products
-                </a>
+                <p class="text-muted">Featured products will appear here once added by the administrator</p>
             </div>
         `;
     } else {
@@ -212,10 +203,7 @@ function loadDealProducts() {
             <div class="col-12 text-center py-5">
                 <i class="bi bi-tag display-1 text-muted mb-3"></i>
                 <h4>No Deals Available</h4>
-                <p class="text-muted">Add products with sale prices or sale badge through the admin panel</p>
-                <a href="admin.html" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Add Products
-                </a>
+                <p class="text-muted">Special deals will appear here once added by the administrator</p>
             </div>
         `;
     } else {

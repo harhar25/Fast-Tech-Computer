@@ -1,5 +1,8 @@
 /* Fast Tech Enterprise - Core Components */
 
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 /* Design System Variables */
 :root {
   --primary: #0f172a;
@@ -26,9 +29,6 @@
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --transition-normal: 250ms ease;
 }
-
-/* Import Google Font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 /* Global Styles */
 body {
