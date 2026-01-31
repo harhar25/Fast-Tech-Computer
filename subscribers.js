@@ -45,7 +45,11 @@ function initializeSubscriptionForm() {
 }
 
 // Handle subscription submission
-async function handleSubscription() {
+async function handleSubscription(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    
     const emailInput = document.getElementById('subscriberEmail');
     const messageDiv = document.getElementById('subscriptionMessage');
     const email = emailInput.value.trim();

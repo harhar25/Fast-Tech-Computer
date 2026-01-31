@@ -161,26 +161,6 @@
         </div>
     </section>
 
-    <!-- Newsletter -->
-    <section class="newsletter-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="newsletter-content text-center">
-                        <h2 class="newsletter-title">Stay Updated</h2>
-                        <p class="newsletter-description">Get the latest deals and new product alerts delivered to your inbox</p>
-                        <form class="newsletter-form d-flex gap-3 justify-content-center">
-                            <input type="email" id="newsletterEmail" name="newsletterEmail" class="form-control newsletter-input" placeholder="Enter your email" style="max-width: 400px; z-index: 1; position: relative;" autocomplete="email">
-                            <button class="btn btn-newsletter" type="submit">
-                                <i class="bi bi-send"></i> Subscribe
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Newsletter Subscription -->
     <section class="newsletter-section py-5" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
         <div class="container">
@@ -189,9 +169,9 @@
                 <p class="mb-5" style="font-size: 1.1rem; color: #ddd;">Get the latest deals and new product alerts delivered to your inbox</p>
                 <div class="row justify-content-center">
                     <div class="col-md-8">
-                        <form id="newsletterForm" class="d-flex gap-2 flex-column flex-sm-row">
-                            <input type="email" class="form-control" id="subscriberEmail" placeholder="Enter your email" required style="padding: 12px 20px; font-size: 1rem; border: none; border-radius: 8px;">
-                            <button type="submit" class="btn btn-primary" style="padding: 12px 30px; font-size: 1.05rem; border-radius: 8px; white-space: nowrap;">
+                        <form id="newsletterForm" class="d-flex gap-2 flex-column flex-sm-row" onsubmit="handleSubscription(event)">
+                            <input type="email" class="form-control" id="subscriberEmail" placeholder="Enter your email" required style="padding: 12px 20px; font-size: 1rem; border: none; border-radius: 8px; flex: 1; position: relative; z-index: 10; pointer-events: auto;">
+                            <button type="submit" class="btn btn-primary" style="padding: 12px 30px; font-size: 1.05rem; border-radius: 8px; white-space: nowrap; cursor: pointer;">
                                 <i class="bi bi-send"></i> Subscribe
                             </button>
                         </form>

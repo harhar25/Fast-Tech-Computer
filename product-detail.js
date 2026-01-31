@@ -120,7 +120,8 @@ function displayProductDetails(product) {
     const originalPriceHtml = product.originalPrice ? 
         `<span class="original-price">$${product.originalPrice.toFixed(2)}</span>` : '';
     
-    const ratingHtml = createRatingStars(product.rating);
+    // Use placeholder rating for now - will be updated after reviews load
+    const ratingHtml = createRatingStars(0);
     
     const specsHtml = Object.entries(product.specs).map(([key, value]) => {
         const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
@@ -142,9 +143,9 @@ function displayProductDetails(product) {
         <div class="col-lg-6">
             <div class="product-info">
                 <h1 class="mb-3">${product.name}</h1>
-                <div class="product-rating mb-3">
+                <div class="product-rating mb-3" id="productDetailRating">
                     ${ratingHtml}
-                    <span class="text-muted">(${product.reviews} reviews)</span>
+                    <span class="text-muted" id="reviewCountDisplay">(0 reviews)</span>
                 </div>
                 <div class="product-price mb-4">
                     <span class="display-6 fw-bold text-primary">${formatPrice(product.price)}</span>
@@ -166,9 +167,6 @@ function displayProductDetails(product) {
                             onclick="handleOrderClick('${product.name}')" 
                             ${!product.inStock ? 'disabled' : ''}>
                         <i class="bi bi-facebook"></i> Make an Order for this Item
-                    </button>
-                    <button class="btn btn-outline-primary btn-lg">
-                        <i class="bi bi-heart"></i> Wishlist
                     </button>
                 </div>
                 
@@ -463,6 +461,16 @@ function displayReviewsSection(productId, reviews) {
     
     const totalReviews = reviews.length;
     const averageRating = totalReviews > 0 ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalReviews).toFixed(1) : 0;
+    
+    // Update the product detail rating at the top
+    const detailRatingElement = document.getElementById('productDetailRating');
+    const reviewCountElement = document.getElementById('reviewCountDisplay');
+    if (detailRatingElement) {
+        detailRatingElement.innerHTML = createRatingStars(averageRating);
+    }
+    if (reviewCountElement) {
+        reviewCountElement.textContent = `(${totalReviews} reviews)`;
+    }
     
     // Calculate star distribution
     const starCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
