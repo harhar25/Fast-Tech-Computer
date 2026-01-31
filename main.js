@@ -215,6 +215,9 @@ function loadFeaturedProducts() {
             return createProductCard(product);
         }).join('');
         console.log('✅ Featured products displayed');
+        
+        // Load real reviews for each product card
+        loadReviewsForProducts(featuredProducts);
     }
     
     // Ensure container is visible
@@ -250,6 +253,53 @@ function loadDealProducts() {
         `;
     } else {
         container.innerHTML = dealProducts.map(product => createProductCard(product)).join('');
+        
+        // Load real reviews for each product card
+        loadReviewsForProducts(dealProducts);
+    }
+}
+
+// Load real reviews from Firebase for all displayed products
+async function loadReviewsForProducts(products) {
+    for (const product of products) {
+        loadProductReviews(product.id);
+    }
+}
+
+// Load reviews for a single product and update the card
+async function loadProductReviews(productId) {
+    try {
+        if (!firebaseDB || !firebaseRef || !firebaseGet) {
+            console.log('Firebase not available for reviews');
+            return;
+        }
+        
+        const reviewsRef = firebaseRef(firebaseDB, `reviews/${productId}`);
+        const snapshot = await firebaseGet(reviewsRef);
+        
+        if (snapshot.exists()) {
+            const reviewsData = snapshot.val();
+            const reviews = Array.isArray(reviewsData) ? reviewsData : Object.values(reviewsData);
+            const validReviews = reviews.filter(r => r && typeof r === 'object');
+            
+            if (validReviews.length > 0) {
+                // Calculate average rating
+                const averageRating = (validReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / validReviews.length).toFixed(1);
+                
+                // Update product card with real reviews
+                const ratingElement = document.getElementById(`rating-${productId}`);
+                const reviewCountElement = document.getElementById(`review-count-${productId}`);
+                
+                if (ratingElement && reviewCountElement) {
+                    ratingElement.innerHTML = createRatingStars(averageRating);
+                    reviewCountElement.textContent = `(${validReviews.length})`;
+                    
+                    console.log(`✅ Updated reviews for product ${productId}: ${averageRating} stars from ${validReviews.length} reviews`);
+                }
+            }
+        }
+    } catch (error) {
+        console.error(`Error loading reviews for product ${productId}:`, error);
     }
 }
 
@@ -264,13 +314,13 @@ function createProductCard(product) {
     const ratingHtml = createRatingStars(product.rating);
     
     return `
-        <div class="product-card">
+        <div class="product-card" data-product-id="${product.id}">
             <div class="product-image">
                 <img src="${product.image}" alt="${product.name}">
                 ${badgeHtml}
                 <div class="product-quick-actions">
-                    <button class="quick-action-btn" onclick="addToCart('${product.id}')" title="Add to Cart">
-                        <i class="bi bi-cart-plus"></i>
+                    <button class="quick-action-btn" onclick="handleOrderClick('${product.name}')" title="Make an Order for this Item">
+                        <i class="bi bi-facebook"></i>
                     </button>
                     <button class="quick-action-btn" onclick="window.location.href='product.html?id=${product.id}'" title="View Details">
                         <i class="bi bi-eye"></i>
@@ -281,9 +331,9 @@ function createProductCard(product) {
                 <div class="product-category">${product.category.replace('-', ' ')}</div>
                 <h5 class="product-title">${product.name}</h5>
                 <p class="product-description">${product.description}</p>
-                <div class="product-rating">
+                <div class="product-rating" id="rating-${product.id}">
                     ${ratingHtml}
-                    <span class="rating-count">(${product.reviews})</span>
+                    <span class="rating-count" id="review-count-${product.id}">(${product.reviews})</span>
                 </div>
                 <div class="product-price">
                     <span class="price-current">${formatPrice(product.price)}</span>

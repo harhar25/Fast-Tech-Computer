@@ -163,9 +163,9 @@ function displayProductDetails(product) {
                 
                 <div class="d-flex gap-3 mb-4">
                     <button class="btn btn-primary btn-lg ${!product.inStock ? 'disabled' : ''}" 
-                            onclick="addToCart('${product.id}')" 
+                            onclick="handleOrderClick('${product.name}')" 
                             ${!product.inStock ? 'disabled' : ''}>
-                        <i class="bi bi-cart-plus"></i> Add to Cart
+                        <i class="bi bi-facebook"></i> Make an Order for this Item
                     </button>
                     <button class="btn btn-outline-primary btn-lg">
                         <i class="bi bi-heart"></i> Wishlist
@@ -279,8 +279,8 @@ function createRelatedProductCard(product) {
                     </div>
                     <div class="d-grid gap-2">
                         <a href="product.html?id=${product.id}" class="btn btn-outline-primary">View Details</a>
-                        <button class="btn btn-primary add-to-cart-btn" data-product-id="${product.id}">
-                            <i class="bi bi-cart-plus"></i> Add to Cart
+                        <button class="btn btn-primary order-btn" onclick="handleOrderClick('${product.name}')">
+                            <i class="bi bi-facebook"></i> Make an Order
                         </button>
                     </div>
                 </div>
@@ -670,21 +670,10 @@ document.addEventListener('input', function(e) {
     }
 });
 
-// Add to cart button handler
+// Order button handler (advertisement-based system)
+// Add to cart functionality removed - now using order system
 document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('add-to-cart-btn')) {
-        const productId = e.target.dataset.productId;
-        cart.addItem(productId);
-    }
-});
-
-// Cart button click handler
-document.addEventListener('DOMContentLoaded', function() {
-    const cartBtn = document.getElementById('cartBtn');
-    if (cartBtn) {
-        cartBtn.addEventListener('click', function() {
-            const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-            cartModal.show();
-        });
+    if (e.target.classList.contains('order-btn')) {
+        // Order handled by order.js
     }
 });

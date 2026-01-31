@@ -197,6 +197,53 @@ function displayProducts(products) {
             card.classList.add('fade-in');
         }, index * 50);
     });
+    
+    // Load real reviews for each product card
+    loadReviewsForProducts(products);
+}
+
+// Load real reviews from Firebase for all displayed products
+async function loadReviewsForProducts(products) {
+    for (const product of products) {
+        loadProductReviews(product.id);
+    }
+}
+
+// Load reviews for a single product and update the card
+async function loadProductReviews(productId) {
+    try {
+        if (!firebaseDB || !firebaseRef || !firebaseGet) {
+            console.log('Firebase not available for reviews');
+            return;
+        }
+        
+        const reviewsRef = firebaseRef(firebaseDB, `reviews/${productId}`);
+        const snapshot = await firebaseGet(reviewsRef);
+        
+        if (snapshot.exists()) {
+            const reviewsData = snapshot.val();
+            const reviews = Array.isArray(reviewsData) ? reviewsData : Object.values(reviewsData);
+            const validReviews = reviews.filter(r => r && typeof r === 'object');
+            
+            if (validReviews.length > 0) {
+                // Calculate average rating
+                const averageRating = (validReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / validReviews.length).toFixed(1);
+                
+                // Update product card with real reviews
+                const ratingElement = document.getElementById(`rating-${productId}`);
+                const reviewCountElement = document.getElementById(`review-count-${productId}`);
+                
+                if (ratingElement && reviewCountElement) {
+                    ratingElement.innerHTML = createRatingStars(averageRating);
+                    reviewCountElement.textContent = `(${validReviews.length})`;
+                    
+                    console.log(`✅ Updated reviews for product ${productId}: ${averageRating} stars from ${validReviews.length} reviews`);
+                }
+            }
+        }
+    } catch (error) {
+        console.error(`Error loading reviews for product ${productId}:`, error);
+    }
 }
 
 // Create product card HTML (same as main.js but included here for independence)
@@ -229,8 +276,8 @@ function createProductCard(product) {
                     </div>
                     <div class="d-grid gap-2">
                         <a href="product.html?id=${product.id}" class="btn btn-outline-primary">View Details</a>
-                        <button class="btn btn-primary add-to-cart-btn" data-product-id="${product.id}">
-                            <i class="bi bi-cart-plus"></i> Add to Cart
+                        <button class="btn btn-primary order-btn" onclick="handleOrderClick('${product.name}')">
+                            <i class="bi bi-facebook"></i> Make an Order
                         </button>
                     </div>
                 </div>
@@ -417,21 +464,5 @@ function hideSearchResults() {
     }
 }
 
-// Add to cart button handler
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('add-to-cart-btn')) {
-        const productId = e.target.dataset.productId;
-        cart.addItem(productId);
-    }
-});
-
-// Cart button click handler
-document.addEventListener('DOMContentLoaded', function() {
-    const cartBtn = document.getElementById('cartBtn');
-    if (cartBtn) {
-        cartBtn.addEventListener('click', function() {
-            const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-            cartModal.show();
-        });
-    }
-});
+// Order system activated (advertisement-based)
+// Cart functionality removed - using order.js instead

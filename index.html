@@ -58,10 +58,6 @@
                             <!-- Search results will appear here -->
                         </div>
                     </div>
-                    <button class="btn btn-outline-light position-relative cart-button-navbar" id="cartBtn">
-                        <i class="bi bi-cart3"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartCount">0</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -185,6 +181,27 @@
         </div>
     </section>
 
+    <!-- Newsletter Subscription -->
+    <section class="newsletter-section py-5" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+        <div class="container">
+            <div class="text-center text-white">
+                <h2 class="mb-3" style="font-size: 2.5rem; font-weight: bold;">Stay Updated</h2>
+                <p class="mb-5" style="font-size: 1.1rem; color: #ddd;">Get the latest deals and new product alerts delivered to your inbox</p>
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <form id="newsletterForm" class="d-flex gap-2 flex-column flex-sm-row">
+                            <input type="email" class="form-control" id="subscriberEmail" placeholder="Enter your email" required style="padding: 12px 20px; font-size: 1rem; border: none; border-radius: 8px;">
+                            <button type="submit" class="btn btn-primary" style="padding: 12px 30px; font-size: 1.05rem; border-radius: 8px; white-space: nowrap;">
+                                <i class="bi bi-send"></i> Subscribe
+                            </button>
+                        </form>
+                        <small id="subscriptionMessage" class="text-warning mt-3" style="display: none;"></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer id="contact" class="bg-dark text-white py-4">
         <div class="container">
@@ -215,8 +232,11 @@
         </div>
     </footer>
 
-    <!-- Cart Modal -->
-    <div class="modal fade" id="cartModal" tabindex="-1">
+    <!-- Order System Scripts -->
+    <script src="order.js"></script>
+
+    <!-- Cart Modal (Hidden - No longer used for advertisement-based ordering) -->
+    <div class="modal fade" id="cartModal" tabindex="-1" style="display: none;">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -239,6 +259,7 @@
     <script src="currency.js?v=2"></script>
     <script src="products.js"></script>
     <script src="cart.js"></script>
+    <script src="subscribers.js"></script>
     <script src="main.js"></script>
 
     <script type="module">

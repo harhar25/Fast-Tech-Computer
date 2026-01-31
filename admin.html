@@ -592,6 +592,7 @@
     
     <script src="currency.js?v=2"></script>
     <script src="products.js"></script>
+    <script src="subscribers.js"></script>
     <script>
         // Admin credentials
         const ADMIN_CREDENTIALS = {
@@ -1059,6 +1060,22 @@
                 
                 // Show success alert
                 showAlert('Product added successfully to Firebase!', 'success');
+                
+                // Notify subscribers about new product (async, doesn't block the flow)
+                if (typeof notifySubscribersAboutNewProduct === 'function') {
+                    notifySubscribersAboutNewProduct(newProduct.name, newProduct.description, newProduct.price)
+                        .then(result => {
+                            if (result.success) {
+                                console.log('%c📧 Subscribers notified about new product', 'color: green; font-weight: bold;', result.message);
+                                showAlert(`✅ Notification sent to ${result.subscriberCount} subscribers!`, 'info');
+                            } else {
+                                console.log('%c ℹ️ No subscribers to notify yet', 'color: blue;');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error notifying subscribers:', error);
+                        });
+                }
             } catch (error) {
                 console.error('Error adding product to Firebase:', error);
                 showAlert('Error adding product: ' + error.message, 'danger');
