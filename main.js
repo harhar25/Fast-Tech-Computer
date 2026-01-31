@@ -496,18 +496,43 @@ document.addEventListener('DOMContentLoaded', function() {
     if (newsletterForm && newsletterEmail) {
         newsletterForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const email = newsletterEmail.value;
+            const email = newsletterEmail.value.trim();
             
-            if (email) {
-                // Check if cart object exists
-                if (typeof cart !== 'undefined' && cart.showNotification) {
-                    cart.showNotification('Successfully subscribed to newsletter!', 'success');
-                } else {
-                    // Fallback notification
-                    alert('Successfully subscribed to newsletter!');
-                }
-                newsletterEmail.value = '';
+            if (!email) {
+                showNotification('Please enter your email address', 'warning');
+                return;
             }
+            
+            if (!isValidEmail(email)) {
+                showNotification('Please enter a valid email address', 'warning');
+                return;
+            }
+            
+            // Show loading state
+            const subscribeBtn = newsletterForm.querySelector('button');
+            const originalText = subscribeBtn.innerHTML;
+            subscribeBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Subscribing...';
+            subscribeBtn.disabled = true;
+            
+            // Simulate newsletter subscription (in real app, this would call an API)
+            setTimeout(() => {
+                // Store subscription in localStorage for demo purposes
+                const subscriptions = JSON.parse(localStorage.getItem('newsletterSubscriptions') || '[]');
+                if (!subscriptions.includes(email)) {
+                    subscriptions.push(email);
+                    localStorage.setItem('newsletterSubscriptions', JSON.stringify(subscriptions));
+                }
+                
+                // Show success message
+                showNotification('Successfully subscribed to our newsletter! Check your email for confirmation.', 'success');
+                
+                // Reset form
+                newsletterEmail.value = '';
+                subscribeBtn.innerHTML = originalText;
+                subscribeBtn.disabled = false;
+                
+                console.log('Newsletter subscription:', email);
+            }, 1500);
         });
         
         // Also handle button click
@@ -515,20 +540,52 @@ document.addEventListener('DOMContentLoaded', function() {
         if (subscribeBtn) {
             subscribeBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                const email = newsletterEmail.value;
-                
-                if (email) {
-                    if (typeof cart !== 'undefined' && cart.showNotification) {
-                        cart.showNotification('Successfully subscribed to newsletter!', 'success');
-                    } else {
-                        alert('Successfully subscribed to newsletter!');
-                    }
-                    newsletterEmail.value = '';
-                }
+                newsletterForm.dispatchEvent(new Event('submit'));
             });
         }
     }
 });
+
+// Email validation function
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// Show notification function
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = `
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    notification.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+    
+    // Handle manual close
+    notification.querySelector('.btn-close').addEventListener('click', function() {
+        notification.remove();
+    });
+}
 
 // Category card hover effects
 document.addEventListener('DOMContentLoaded', function() {

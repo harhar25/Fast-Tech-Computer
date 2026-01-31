@@ -1031,7 +1031,16 @@
                 
                 let categoryProducts = [];
                 if (categorySnapshot.exists()) {
-                    categoryProducts = categorySnapshot.val() || [];
+                    const existingData = categorySnapshot.val();
+                    // Ensure we have an array, convert object to array if needed
+                    if (Array.isArray(existingData)) {
+                        categoryProducts = existingData;
+                    } else if (typeof existingData === 'object' && existingData !== null) {
+                        // Convert object to array
+                        categoryProducts = Object.values(existingData);
+                    } else {
+                        categoryProducts = [];
+                    }
                 }
                 
                 categoryProducts.push(newProduct);
@@ -1122,7 +1131,17 @@
                     const oldCategorySnapshot = await window.firebaseGet(oldCategoryRef);
                     
                     if (oldCategorySnapshot.exists()) {
-                        const oldCategoryProducts = oldCategorySnapshot.val() || [];
+                        const oldCategoryData = oldCategorySnapshot.val();
+                        let oldCategoryProducts = [];
+                        // Ensure we have an array, convert object to array if needed
+                        if (Array.isArray(oldCategoryData)) {
+                            oldCategoryProducts = oldCategoryData;
+                        } else if (typeof oldCategoryData === 'object' && oldCategoryData !== null) {
+                            oldCategoryProducts = Object.values(oldCategoryData);
+                        } else {
+                            oldCategoryProducts = [];
+                        }
+                        
                         const updatedOldCategory = oldCategoryProducts.filter(p => p.id !== productId);
                         await window.firebaseSet(oldCategoryRef, updatedOldCategory);
                     }
@@ -1134,7 +1153,16 @@
                 
                 let categoryProducts = [];
                 if (newCategorySnapshot.exists()) {
-                    categoryProducts = newCategorySnapshot.val() || [];
+                    const existingData = newCategorySnapshot.val();
+                    // Ensure we have an array, convert object to array if needed
+                    if (Array.isArray(existingData)) {
+                        categoryProducts = existingData;
+                    } else if (typeof existingData === 'object' && existingData !== null) {
+                        // Convert object to array
+                        categoryProducts = Object.values(existingData);
+                    } else {
+                        categoryProducts = [];
+                    }
                 }
                 
                 // Find and update the product in the category array
@@ -1174,7 +1202,17 @@
                 const categorySnapshot = await window.firebaseGet(categoryRef);
                 
                 if (categorySnapshot.exists()) {
-                    const categoryProducts = categorySnapshot.val() || [];
+                    const categoryData = categorySnapshot.val();
+                    let categoryProducts = [];
+                    // Ensure we have an array, convert object to array if needed
+                    if (Array.isArray(categoryData)) {
+                        categoryProducts = categoryData;
+                    } else if (typeof categoryData === 'object' && categoryData !== null) {
+                        categoryProducts = Object.values(categoryData);
+                    } else {
+                        categoryProducts = [];
+                    }
+                    
                     const updatedCategoryProducts = categoryProducts.filter(p => p.id !== productId);
                     await window.firebaseSet(categoryRef, updatedCategoryProducts);
                 }
