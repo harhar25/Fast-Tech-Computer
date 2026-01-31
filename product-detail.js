@@ -73,7 +73,7 @@ function displayProductDetails(product) {
                     <span class="text-muted">(${product.reviews} reviews)</span>
                 </div>
                 <div class="product-price mb-4">
-                    <span class="display-6 fw-bold text-primary">$${product.price.toFixed(2)}</span>
+                    <span class="display-6 fw-bold text-primary">${formatPrice(product.price)}</span>
                     ${originalPriceHtml}
                 </div>
                 <p class="lead mb-4">${product.description}</p>
@@ -232,7 +232,7 @@ function createRelatedProductCard(product) {
         `<span class="product-badge badge-${product.badge}">${product.badge.toUpperCase()}</span>` : '';
     
     const originalPriceHtml = product.originalPrice ? 
-        `<span class="original-price">$${product.originalPrice.toFixed(2)}</span>` : '';
+        `<span class="original-price">${formatPrice(product.originalPrice)}</span>` : '';
     
     const ratingHtml = createRatingStars(product.rating);
     
@@ -251,7 +251,7 @@ function createRelatedProductCard(product) {
                         <small class="text-muted">(${product.reviews} reviews)</small>
                     </div>
                     <div class="product-price">
-                        $${product.price.toFixed(2)}
+                        ${formatPrice(product.price)}
                         ${originalPriceHtml}
                     </div>
                     <div class="d-grid gap-2">
@@ -384,7 +384,7 @@ function displaySearchResults(results, query) {
                     <img src="${product.image}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 1rem;">
                     <div>
                         <h6 class="mb-0">${product.name}</h6>
-                        <small class="text-muted">${product.category} - $${product.price.toFixed(2)}</small>
+                        <small class="text-muted">${product.category} - ${formatPrice(product.price)}</small>
                     </div>
                 </div>
             </div>

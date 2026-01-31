@@ -84,7 +84,7 @@ function createProductCard(product) {
         `<span class="product-badge badge-${product.badge}">${product.badge.toUpperCase()}</span>` : '';
     
     const originalPriceHtml = product.originalPrice ? 
-        `<span class="original-price">$${product.originalPrice.toFixed(2)}</span>` : '';
+        `<span class="original-price">${formatPrice(product.originalPrice)}</span>` : '';
     
     const ratingHtml = createRatingStars(product.rating);
     
@@ -103,7 +103,7 @@ function createProductCard(product) {
                         <small class="text-muted">(${product.reviews} reviews)</small>
                     </div>
                     <div class="product-price">
-                        $${product.price.toFixed(2)}
+                        ${formatPrice(product.price)}
                         ${originalPriceHtml}
                     </div>
                     <div class="d-grid gap-2">

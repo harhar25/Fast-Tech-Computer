@@ -129,7 +129,7 @@ class ShoppingCart {
                         </div>
                         <div class="cart-item-details">
                             <div class="cart-item-title">${product.name}</div>
-                            <div class="cart-item-price">$${product.price.toFixed(2)}</div>
+                            <div class="cart-item-price">${formatPrice(product.price)}</div>
                             <div class="quantity-control">
                                 <button onclick="cart.updateQuantity('${item.productId}', ${item.quantity - 1})">-</button>
                                 <input type="number" value="${item.quantity}" min="1" onchange="cart.updateQuantity('${item.productId}', parseInt(this.value))">
@@ -145,7 +145,7 @@ class ShoppingCart {
         });
 
         cartItems.innerHTML = html;
-        cartTotal.textContent = this.getTotal().toFixed(2);
+        cartTotal.textContent = formatPrice(this.getTotal());
     }
 
     // Show notification

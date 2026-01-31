@@ -43,7 +43,7 @@ function createProductCard(product) {
         `<span class="product-badge badge-${product.badge}">${product.badge.toUpperCase()}</span>` : '';
     
     const originalPriceHtml = product.originalPrice ? 
-        `<span class="price-original">$${product.originalPrice.toFixed(2)}</span>` : '';
+        `<span class="price-original">${formatPrice(product.originalPrice)}</span>` : '';
     
     const ratingHtml = createRatingStars(product.rating);
     
@@ -70,7 +70,7 @@ function createProductCard(product) {
                     <span class="rating-count">(${product.reviews})</span>
                 </div>
                 <div class="product-price">
-                    <span class="price-current">$${product.price.toFixed(2)}</span>
+                    <span class="price-current">${formatPrice(product.price)}</span>
                     ${originalPriceHtml}
                 </div>
                 <div class="product-actions">
@@ -161,7 +161,7 @@ function displaySearchResults(results, query) {
                     <img src="${product.image}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 1rem;">
                     <div>
                         <h6 class="mb-0">${product.name}</h6>
-                        <small class="text-muted">${product.category} - $${product.price.toFixed(2)}</small>
+                        <small class="text-muted">${product.category} - ${formatPrice(product.price)}</small>
                     </div>
                 </div>
             </div>

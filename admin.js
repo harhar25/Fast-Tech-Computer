@@ -85,7 +85,7 @@ function updateOverview() {
     document.getElementById('totalProducts').textContent = totalProducts;
     document.getElementById('inStockCount').textContent = inStock;
     document.getElementById('categoryCount').textContent = categories;
-    document.getElementById('totalValue').textContent = '$' + totalValue.toFixed(2);
+    document.getElementById('totalValue').textContent = formatPrice(totalValue);
 }
 
 // Show specific section
@@ -122,7 +122,7 @@ function loadProductsTable() {
             <td>${product.id}</td>
             <td>${product.name}</td>
             <td>${product.category}</td>
-            <td>$${product.price.toFixed(2)}</td>
+            <td>${formatPrice(product.price)}</td>
             <td>${product.inStock ? '<span class="badge bg-success">In Stock</span>' : '<span class="badge bg-danger">Out of Stock</span>'}</td>
             <td>
                 <div class="action-buttons">
