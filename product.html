@@ -33,14 +33,14 @@
                         <a class="nav-link" href="index.html#contact">Contact</a>
                     </li>
                 </ul>
-                <div class="d-flex align-items-center">
-                    <div class="input-group me-3" style="width: 250px;">
-                        <span class="input-group-text bg-dark border-dark text-light">
+                <div class="d-flex align-items-center gap-3 navbar-search-cart">
+                    <div class="input-group search-container-wrapper">
+                        <span class="input-group-text search-icon">
                             <i class="bi bi-search"></i>
                         </span>
-                        <input type="text" class="form-control bg-dark border-dark text-light" placeholder="Search products..." id="searchInput">
+                        <input type="text" class="form-control search-input" placeholder="Search products..." id="searchInput">
                     </div>
-                    <button class="btn btn-outline-light position-relative me-2" id="cartBtn">
+                    <button class="btn btn-outline-light position-relative cart-button-navbar" id="cartBtn">
                         <i class="bi bi-cart3"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartCount">0</span>
                     </button>
@@ -125,6 +125,55 @@
             </div>
         </div>
     </footer>
+
+    <!-- Review Modal -->
+    <div class="modal fade" id="reviewModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Write a Review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="reviewForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="reviewProductId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Rating <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <div class="flex-grow-1">
+                                    <input type="range" class="form-range" id="reviewRating" min="0" max="5" step="1" value="0">
+                                </div>
+                                <span class="badge bg-warning text-dark" id="reviewRatingDisplay">0</span>
+                            </div>
+                            <small class="text-muted">Select how many stars you'd like to give</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="reviewTitle" class="form-label">Review Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="reviewTitle" placeholder="e.g., Great product for the price" required>
+                            <small class="text-muted">Keep it short and descriptive</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="reviewCustomerName" class="form-label">Your Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="reviewCustomerName" placeholder="Enter your name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="reviewComment" class="form-label">Your Review <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="reviewComment" rows="5" placeholder="Share your experience with this product (at least 10 characters)" required></textarea>
+                            <small class="text-muted">Be honest and helpful to other customers</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="submitReview()">Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Cart Modal -->
     <div class="modal fade" id="cartModal" tabindex="-1">

@@ -94,7 +94,73 @@ body {
   width: 80%;
 }
 
-/* Enhanced Search Bar */
+/* Navbar Search and Cart Alignment */
+.navbar-search-cart {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+
+.search-container-wrapper {
+  display: flex;
+  align-items: center;
+  min-width: 280px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+  transition: all 150ms ease;
+}
+
+.search-icon {
+  background: transparent !important;
+  border: none !important;
+  color: var(--gray-400) !important;
+  padding: 0.5rem 0.75rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-input {
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  padding: 0.5rem 0.5rem 0.5rem 0 !important;
+  min-width: 180px;
+}
+
+.search-input::placeholder {
+  color: var(--gray-400) !important;
+}
+
+.search-input:focus {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.search-container-wrapper:focus-within {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Enhanced Cart Button */
+.cart-button-navbar {
+  padding: 0.5rem 1rem !important;
+  border-radius: var(--radius-lg) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.cart-button-navbar:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px);
+}
+
+/* Legacy search-container for backward compatibility */
 .search-container input {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);

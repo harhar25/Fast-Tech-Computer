@@ -1,7 +1,7 @@
 // Product Detail Page JavaScript
 
 // Firebase integration
-let firebaseDB, firebaseRef, firebaseGet;
+let firebaseDB, firebaseRef, firebaseGet, firebasePush, firebaseUpdate;
 
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('%c📄 Product Detail Page - DOMContentLoaded', 'color: blue; font-weight: bold;');
@@ -20,7 +20,7 @@ async function initializeFirebaseForProductDetail() {
     try {
         console.log('%c🔄 Initializing Firebase for product detail page...', 'color: orange;');
         const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js");
-        const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js");
+        const { getDatabase, ref, get, push, update } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js");
         
         // Firebase configuration
         const firebaseConfig = {
@@ -38,6 +38,8 @@ async function initializeFirebaseForProductDetail() {
         firebaseDB = getDatabase(app);
         firebaseRef = ref;
         firebaseGet = get;
+        firebasePush = push;
+        firebaseUpdate = update;
         
         console.log('%c✅ Firebase initialized for product detail page', 'color: green; font-weight: bold;');
         
@@ -210,71 +212,20 @@ function displayProductDetails(product) {
         </div>
         
         <div class="col-12 mt-5">
-            <div class="product-reviews">
+            <div id="reviewsSection" class="product-reviews">
                 <h3 class="mb-4">Customer Reviews</h3>
-                <div class="mb-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="me-3">
-                            <div class="display-4 fw-bold">${product.rating}</div>
-                            <div>${ratingHtml}</div>
-                        </div>
-                        <div>
-                            <p class="mb-0">Based on ${product.reviews} reviews</p>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-warning" style="width: ${(product.rating / 5) * 100}%"></div>
-                            </div>
-                        </div>
+                <div class="text-center py-5">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading reviews...</span>
                     </div>
-                </div>
-                
-                <div class="review-summary">
-                    <h5>Review Summary</h5>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>5 Stars</span>
-                                <div class="progress flex-grow-1 mx-3" style="height: 8px;">
-                                    <div class="progress-bar bg-warning" style="width: 60%"></div>
-                                </div>
-                                <span>60%</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>4 Stars</span>
-                                <div class="progress flex-grow-1 mx-3" style="height: 8px;">
-                                    <div class="progress-bar bg-warning" style="width: 25%"></div>
-                                </div>
-                                <span>25%</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>3 Stars</span>
-                                <div class="progress flex-grow-1 mx-3" style="height: 8px;">
-                                    <div class="progress-bar bg-warning" style="width: 10%"></div>
-                                </div>
-                                <span>10%</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>2 Stars</span>
-                                <div class="progress flex-grow-1 mx-3" style="height: 8px;">
-                                    <div class="progress-bar bg-warning" style="width: 3%"></div>
-                                </div>
-                                <span>3%</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>1 Star</span>
-                                <div class="progress flex-grow-1 mx-3" style="height: 8px;">
-                                    <div class="progress-bar bg-warning" style="width: 2%"></div>
-                                </div>
-                                <span>2%</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <button class="btn btn-outline-primary w-100">Write a Review</button>
-                        </div>
-                    </div>
+                    <p class="mt-3">Loading reviews...</p>
                 </div>
             </div>
         </div>
     `;
+    
+    // Load reviews after displaying product details
+    loadAndDisplayReviews(product.id);
 }
 
 // Load related products
@@ -473,6 +424,251 @@ function hideSearchResults() {
         searchResults.style.display = 'none';
     }
 }
+
+// Load and display reviews
+async function loadAndDisplayReviews(productId) {
+    try {
+        if (!firebaseDB || !firebaseRef || !firebaseGet) {
+            console.log('%c⚠️ Firebase not available for reviews', 'color: orange;');
+            displayNoReviewsYet(productId);
+            return;
+        }
+        
+        console.log('%c🔄 Loading reviews for product:', 'color: blue;', productId);
+        
+        const reviewsRef = firebaseRef(firebaseDB, `reviews/${productId}`);
+        const snapshot = await firebaseGet(reviewsRef);
+        
+        let reviews = [];
+        if (snapshot.exists()) {
+            const reviewsData = snapshot.val();
+            reviews = Array.isArray(reviewsData) ? reviewsData : Object.values(reviewsData);
+            reviews = reviews.filter(r => r && typeof r === 'object'); // Filter out null/invalid entries
+            console.log('%c✅ Reviews loaded:', 'color: green;', reviews.length);
+        } else {
+            console.log('%c ℹ️ No reviews yet for this product', 'color: blue;');
+        }
+        
+        displayReviewsSection(productId, reviews);
+    } catch (error) {
+        console.error('%c❌ Error loading reviews:', 'color: red;', error);
+        displayNoReviewsYet(productId);
+    }
+}
+
+// Display reviews section
+function displayReviewsSection(productId, reviews) {
+    const reviewsSection = document.getElementById('reviewsSection');
+    if (!reviewsSection) return;
+    
+    const totalReviews = reviews.length;
+    const averageRating = totalReviews > 0 ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalReviews).toFixed(1) : 0;
+    
+    // Calculate star distribution
+    const starCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    reviews.forEach(review => {
+        const rating = Math.round(review.rating || 0);
+        if (starCounts[rating] !== undefined) {
+            starCounts[rating]++;
+        }
+    });
+    
+    const ratingHtml = createRatingStars(averageRating);
+    const reviewsHtml = reviews.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        .map(review => createReviewCard(review)).join('');
+    
+    const starDistributionHtml = [5, 4, 3, 2, 1].map(stars => {
+        const count = starCounts[stars];
+        const percentage = totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0;
+        return `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>${stars} Star${stars !== 1 ? 's' : ''}</span>
+                <div class="progress flex-grow-1 mx-3" style="height: 8px; min-width: 150px;">
+                    <div class="progress-bar bg-warning" style="width: ${percentage}%"></div>
+                </div>
+                <span class="text-muted" style="min-width: 40px; text-align: right;">${percentage}%</span>
+            </div>
+        `;
+    }).join('');
+    
+    reviewsSection.innerHTML = `
+        <div class="row">
+            <div class="col-12">
+                <h3 class="mb-4">Customer Reviews</h3>
+            </div>
+            <div class="col-md-4">
+                <div class="review-stats">
+                    <div class="text-center mb-4">
+                        <div class="display-4 fw-bold">${averageRating}</div>
+                        <div class="mb-2">${ratingHtml}</div>
+                        <p class="text-muted">Based on ${totalReviews} review${totalReviews !== 1 ? 's' : ''}</p>
+                    </div>
+                    <div class="review-distribution">
+                        ${starDistributionHtml}
+                    </div>
+                    <button class="btn btn-primary w-100 mt-4" data-bs-toggle="modal" data-bs-target="#reviewModal" onclick="prepareReviewForm('${productId}')">
+                        <i class="bi bi-pencil"></i> Write a Review
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="reviews-list">
+                    ${totalReviews > 0 ? reviewsHtml : '<p class="text-muted">No reviews yet. Be the first to review this product!</p>'}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Create review card
+function createReviewCard(review) {
+    const reviewDate = new Date(review.timestamp);
+    const formattedDate = reviewDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    const ratingStars = createRatingStars(review.rating);
+    
+    return `
+        <div class="review-card card mb-3 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h5 class="card-title mb-1">${escapeHtml(review.title || 'No title')}</h5>
+                        <p class="card-text text-muted mb-0">
+                            <small>by <strong>${escapeHtml(review.customerName || 'Anonymous')}</strong> on ${formattedDate}</small>
+                        </p>
+                    </div>
+                    <div class="text-warning">${ratingStars}</div>
+                </div>
+                <p class="card-text">${escapeHtml(review.comment || '')}</p>
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="markHelpful(this)">
+                        <i class="bi bi-hand-thumbs-up"></i> Helpful
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Display no reviews yet
+function displayNoReviewsYet(productId) {
+    const reviewsSection = document.getElementById('reviewsSection');
+    if (!reviewsSection) return;
+    
+    reviewsSection.innerHTML = `
+        <h3 class="mb-4">Customer Reviews</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="review-stats text-center">
+                    <div class="display-4 fw-bold text-muted mb-3">No Reviews</div>
+                    <p class="text-muted mb-4">Be the first to review this product!</p>
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#reviewModal" onclick="prepareReviewForm('${productId}')">
+                        <i class="bi bi-pencil"></i> Write a Review
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="reviews-list">
+                    <p class="text-muted">No reviews yet. Share your experience with this product!</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Prepare review form
+function prepareReviewForm(productId) {
+    document.getElementById('reviewProductId').value = productId;
+    document.getElementById('reviewForm').reset();
+    document.getElementById('reviewRatingDisplay').textContent = '0';
+}
+
+// Submit review
+async function submitReview() {
+    const productId = document.getElementById('reviewProductId').value;
+    const rating = parseInt(document.getElementById('reviewRating').value) || 0;
+    const title = document.getElementById('reviewTitle').value.trim();
+    const customerName = document.getElementById('reviewCustomerName').value.trim();
+    const comment = document.getElementById('reviewComment').value.trim();
+    
+    // Validation
+    if (!rating) {
+        alert('Please select a rating');
+        return;
+    }
+    if (!title) {
+        alert('Please enter a review title');
+        return;
+    }
+    if (!customerName) {
+        alert('Please enter your name');
+        return;
+    }
+    if (!comment) {
+        alert('Please enter a review comment');
+        return;
+    }
+    
+    if (comment.length < 10) {
+        alert('Review must be at least 10 characters long');
+        return;
+    }
+    
+    try {
+        const reviewData = {
+            productId,
+            rating,
+            title,
+            customerName,
+            comment,
+            timestamp: new Date().toISOString(),
+            helpful: 0
+        };
+        
+        console.log('%c💬 Submitting review:', 'color: blue;', reviewData);
+        
+        // Push review to Firebase
+        const reviewsRef = firebaseRef(firebaseDB, `reviews/${productId}`);
+        await firebasePush(reviewsRef, reviewData);
+        
+        console.log('%c✅ Review submitted successfully!', 'color: green; font-weight: bold;');
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('reviewModal'));
+        if (modal) modal.hide();
+        
+        // Show success message
+        alert('Thank you for your review! It will appear shortly after moderation.');
+        
+        // Reload reviews
+        loadAndDisplayReviews(productId);
+        
+    } catch (error) {
+        console.error('%c❌ Error submitting review:', 'color: red;', error);
+        alert('Error submitting review. Please try again.');
+    }
+}
+
+// Mark review as helpful
+function markHelpful(button) {
+    button.classList.toggle('active');
+    button.innerHTML = button.classList.contains('active') 
+        ? '<i class="bi bi-hand-thumbs-up-fill"></i> Helpful'
+        : '<i class="bi bi-hand-thumbs-up"></i> Helpful';
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Update rating display when slider changes
+document.addEventListener('input', function(e) {
+    if (e.target.id === 'reviewRating') {
+        document.getElementById('reviewRatingDisplay').textContent = e.target.value;
+    }
+});
 
 // Add to cart button handler
 document.addEventListener('click', function(e) {

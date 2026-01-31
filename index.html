@@ -48,17 +48,17 @@
                         </a>
                     </li>
                 </ul>
-                <div class="d-flex align-items-center">
-                    <div class="input-group me-3 search-container" style="width: 250px; position: relative;">
-                        <span class="input-group-text bg-dark border-dark text-light">
+                <div class="d-flex align-items-center gap-3 navbar-search-cart">
+                    <div class="input-group search-container-wrapper">
+                        <span class="input-group-text search-icon">
                             <i class="bi bi-search"></i>
                         </span>
-                        <input type="text" class="form-control bg-dark border-dark text-light" placeholder="Search products..." id="searchInput">
+                        <input type="text" class="form-control search-input" placeholder="Search products..." id="searchInput">
                         <div class="search-results" id="searchResults" style="display: none;">
                             <!-- Search results will appear here -->
                         </div>
                     </div>
-                    <button class="btn btn-outline-light position-relative me-2" id="cartBtn">
+                    <button class="btn btn-outline-light position-relative cart-button-navbar" id="cartBtn">
                         <i class="bi bi-cart3"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartCount">0</span>
                     </button>
