@@ -119,22 +119,28 @@ async function loadProductsFromFirebase() {
     try {
         if (!firebaseDB || !firebaseRef || !firebaseGet) {
             console.log('Firebase not available, using empty product list');
+            showEmptyState();
             return;
         }
         
+        console.log('Attempting to load products from Firebase...');
         const productsRef = firebaseRef(firebaseDB, 'products');
         const snapshot = await firebaseGet(productsRef);
         
         if (snapshot.exists()) {
             const data = snapshot.val();
+            console.log('Firebase data received:', data);
             updateProductsFromFirebase(data);
-            console.log('Products loaded from Firebase:', getAllProducts().length);
+            const allProducts = getAllProducts();
+            console.log('Products loaded from Firebase:', allProducts.length);
+            console.log('All products:', allProducts);
         } else {
             console.log('No products found in Firebase');
             showEmptyState();
         }
     } catch (error) {
         console.error('Error loading products from Firebase:', error);
+        showEmptyState();
     }
 }
 
@@ -143,9 +149,28 @@ function loadFeaturedProducts() {
     const container = document.getElementById('featuredProducts');
     if (!container) return;
     
-    const featuredProducts = getFeaturedProducts(8);
+    // Get products from Firebase data
+    const allProducts = getAllProducts();
     
-    container.innerHTML = featuredProducts.map(product => createProductCard(product)).join('');
+    // Filter for featured products (products with badge "new", "hot", or no badge)
+    const featuredProducts = allProducts.filter(product => 
+        !product.badge || product.badge === 'new' || product.badge === 'hot'
+    ).slice(0, 8);
+    
+    if (featuredProducts.length === 0) {
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-box display-1 text-muted mb-3"></i>
+                <h4>No Featured Products</h4>
+                <p class="text-muted">Add products through the admin panel to see featured items here</p>
+                <a href="admin.html" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Products
+                </a>
+            </div>
+        `;
+    } else {
+        container.innerHTML = featuredProducts.map(product => createProductCard(product)).join('');
+    }
 }
 
 // Load deal products
@@ -153,9 +178,28 @@ function loadDealProducts() {
     const container = document.getElementById('dealProducts');
     if (!container) return;
     
-    const dealProducts = getDealProducts(4);
+    // Get products from Firebase data
+    const allProducts = getAllProducts();
     
-    container.innerHTML = dealProducts.map(product => createProductCard(product)).join('');
+    // Filter for products with sale badge or original price (indicating discount)
+    const dealProducts = allProducts.filter(product => 
+        product.badge === 'sale' || product.originalPrice
+    ).slice(0, 4);
+    
+    if (dealProducts.length === 0) {
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-tag display-1 text-muted mb-3"></i>
+                <h4>No Deals Available</h4>
+                <p class="text-muted">Add products with sale prices or sale badge through the admin panel</p>
+                <a href="admin.html" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Products
+                </a>
+            </div>
+        `;
+    } else {
+        container.innerHTML = dealProducts.map(product => createProductCard(product)).join('');
+    }
 }
 
 // Create product card HTML
@@ -300,10 +344,76 @@ function hideSearchResults() {
     }
 }
 
-// Initialize smooth scrolling
+// Initialize scroll animations
+function initializeScrollAnimations() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animated');
+                
+                // Add stagger animation to children
+                const staggerElements = entry.target.querySelectorAll('.stagger-animation > *');
+                staggerElements.forEach((el, index) => {
+                    setTimeout(() => {
+                        el.classList.add('animated');
+                    }, index * 100);
+                });
+            }
+        });
+    }, observerOptions);
+
+    // Observe elements with animation classes
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Observe section headers
+    document.querySelectorAll('.section-header').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Observe category cards
+    document.querySelectorAll('.category-card').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Observe product cards
+    document.querySelectorAll('.product-card').forEach(el => {
+        observer.observe(el);
+    });
+}
+
+// Add particle effects to hero section
+function createParticleEffect() {
+    const heroSection = document.querySelector('.hero-section');
+    if (!heroSection) return;
+
+    for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 8 + 's';
+        particle.style.animationDuration = (8 + Math.random() * 4) + 's';
+        
+        const size = Math.random() * 4 + 2;
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.background = `rgba(255, 255, 255, ${Math.random() * 0.3})`;
+        particle.style.borderRadius = '50%';
+        
+        heroSection.appendChild(particle);
+    }
+}
+
+// Enhanced smooth scrolling
 function initializeSmoothScrolling() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
+        anchor.addEventListener('click', function (e) {
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));
             if (target) {
@@ -316,26 +426,38 @@ function initializeSmoothScrolling() {
     });
 }
 
-// Initialize scroll animations
-function initializeScrollAnimations() {
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('slide-up');
-            }
+// Add hover effects with animation
+function addHoverEffects() {
+    // Enhanced button hover effects
+    document.querySelectorAll('.btn-hero').forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
         });
-    }, observerOptions);
-    
-    // Observe product cards and category cards
-    document.querySelectorAll('.product-card, .category-card').forEach(card => {
-        observer.observe(card);
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Enhanced card hover effects
+    document.querySelectorAll('.category-card, .product-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
     });
 }
+
+// Initialize all animations
+document.addEventListener('DOMContentLoaded', function() {
+    initializeScrollAnimations();
+    createParticleEffect();
+    initializeSmoothScrolling();
+    addHoverEffects();
+});
 
 // Newsletter subscription
 document.addEventListener('DOMContentLoaded', function() {
