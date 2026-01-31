@@ -470,17 +470,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Newsletter subscription
 document.addEventListener('DOMContentLoaded', function() {
-    const newsletterForm = document.querySelector('input[type="email"]').parentElement;
-    if (newsletterForm) {
+    const newsletterForm = document.querySelector('.newsletter-form');
+    const newsletterEmail = document.getElementById('newsletterEmail');
+    
+    if (newsletterForm && newsletterEmail) {
         newsletterForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const email = this.querySelector('input[type="email"]').value;
+            const email = newsletterEmail.value;
             
             if (email) {
-                cart.showNotification('Successfully subscribed to newsletter!', 'success');
-                this.querySelector('input[type="email"]').value = '';
+                // Check if cart object exists
+                if (typeof cart !== 'undefined' && cart.showNotification) {
+                    cart.showNotification('Successfully subscribed to newsletter!', 'success');
+                } else {
+                    // Fallback notification
+                    alert('Successfully subscribed to newsletter!');
+                }
+                newsletterEmail.value = '';
             }
         });
+        
+        // Also handle button click
+        const subscribeBtn = newsletterForm.querySelector('button');
+        if (subscribeBtn) {
+            subscribeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const email = newsletterEmail.value;
+                
+                if (email) {
+                    if (typeof cart !== 'undefined' && cart.showNotification) {
+                        cart.showNotification('Successfully subscribed to newsletter!', 'success');
+                    } else {
+                        alert('Successfully subscribed to newsletter!');
+                    }
+                    newsletterEmail.value = '';
+                }
+            });
+        }
     }
 });
 
