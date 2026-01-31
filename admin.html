@@ -550,6 +550,7 @@
         window.firebaseUpdate = update;
     </script>
     
+    <script src="currency.js"></script>
     <script src="products.js"></script>
     <script>
         // Admin credentials
@@ -792,8 +793,8 @@
                             </div>
                             <div class="col-md-2">
                                 <div class="text-end">
-                                    <h6 class="mb-0">$${product.price}</h6>
-                                    ${product.originalPrice ? `<small class="text-muted"><del>$${product.originalPrice}</del></small>` : ''}
+                                    <h6 class="mb-0">${formatPrice(product.price)}</h6>
+                                    ${product.originalPrice ? `<small class="text-muted"><del>${formatPrice(product.originalPrice)}</del></small>` : ''}
                                 </div>
                             </div>
                             <div class="col-md-2">
@@ -881,7 +882,7 @@
                         <small class="text-muted">${product.brand} - ${product.category}</small>
                     </div>
                     <div class="text-end">
-                        <strong>$${product.price}</strong>
+                        <strong>${formatPrice(product.price)}</strong>
                         ${product.badge ? `<span class="badge bg-warning ms-2">${product.badge}</span>` : ''}
                     </div>
                 </div>
