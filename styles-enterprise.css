@@ -484,16 +484,16 @@ body {
   transform: rotate(0deg) scale(1);
 }
 
-/* Cool Vibes Text Styling */
+/* Tech Vibes Text Styling */
 .cool-vibes-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+    background: linear-gradient(135deg, #00d4ff 0%, #0099ff 25%, #0066cc 50%, #003d7a 75%, #001f3f 100%);
     background-size: 400% 400%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: coolVibesGradient 8s ease infinite;
+    animation: techVibesGradient 6s ease infinite;
     font-weight: 600;
-    text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+    text-shadow: 0 0 20px rgba(0, 153, 255, 0.3);
     position: relative;
 }
 
@@ -504,43 +504,39 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
-    filter: blur(10px);
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 102, 204, 0.2));
+    filter: blur(8px);
     z-index: -1;
-    animation: coolVibesGlow 3s ease-in-out infinite alternate;
+    animation: techVibesGlow 4s ease-in-out infinite alternate;
 }
 
-@keyframes coolVibesGradient {
+@keyframes techVibesGradient {
     0% {
         background-position: 0% 50%;
-        filter: hue-rotate(0deg);
+        filter: brightness(1) hue-rotate(0deg);
     }
-    25% {
+    33% {
         background-position: 100% 50%;
-        filter: hue-rotate(90deg);
+        filter: brightness(1.2) hue-rotate(10deg);
     }
-    50% {
+    66% {
         background-position: 100% 100%;
-        filter: hue-rotate(180deg);
-    }
-    75% {
-        background-position: 0% 100%;
-        filter: hue-rotate(270deg);
+        filter: brightness(0.9) hue-rotate(-10deg);
     }
     100% {
         background-position: 0% 50%;
-        filter: hue-rotate(360deg);
+        filter: brightness(1) hue-rotate(0deg);
     }
 }
 
-@keyframes coolVibesGlow {
+@keyframes techVibesGlow {
     0% {
-        opacity: 0.5;
+        opacity: 0.3;
         transform: scale(1);
     }
     100% {
-        opacity: 0.8;
-        transform: scale(1.1);
+        opacity: 0.6;
+        transform: scale(1.05);
     }
 }
 
