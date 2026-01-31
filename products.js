@@ -151,12 +151,13 @@ function updateProductsFromFirebase(firebaseData) {
     if (firebaseData) {
         Object.keys(firebaseData).forEach(category => {
             if (products.hasOwnProperty(category) && Array.isArray(firebaseData[category])) {
-                products[category] = Object.values(firebaseData[category]);
+                products[category] = firebaseData[category];
             }
         });
     }
     
     console.log('Products updated from Firebase:', getAllProducts().length, 'products loaded');
+    console.log('Updated products array:', products);
 }
 
 // Export for use in other files
