@@ -3,13 +3,19 @@
 // Firebase integration
 let firebaseDB, firebaseRef, firebaseGet;
 
+// 🔍 DIAGNOSTIC - Log when main.js loads
+console.log('%c🚀 main.js LOADED', 'color: green; font-weight: bold; font-size: 14px;');
+
 // Initialize Firebase for main website
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('%c📄 DOMContentLoaded event fired in main.js', 'color: blue; font-weight: bold;');
+    
     // Show loading state initially
     showLoadingState();
     
     // Load Firebase SDK
     try {
+        console.log('%c🔄 Starting Firebase initialization...', 'color: orange; font-weight: bold;');
         const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js");
         const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js");
         
@@ -30,17 +36,24 @@ document.addEventListener('DOMContentLoaded', async function() {
         firebaseRef = ref;
         firebaseGet = get;
         
-        console.log('Firebase initialized for main website');
+        console.log('%c✅ Firebase initialized for main website', 'color: green; font-weight: bold;');
+        console.log('Firebase DB instance:', firebaseDB);
         
         // Load products from Firebase first, then display
+        console.log('%c🔄 Calling loadProductsFromFirebase()...', 'color: blue;');
         await loadProductsFromFirebase();
         
+        console.log('%c✅ loadProductsFromFirebase() completed', 'color: green;');
+        
         // Now load featured and deal products from Firebase data
+        console.log('%c📌 Loading featured products...', 'color: blue;');
         loadFeaturedProducts();
+        
+        console.log('%c💰 Loading deal products...', 'color: blue;');
         loadDealProducts();
         
     } catch (error) {
-        console.error('Error initializing Firebase:', error);
+        console.error('%c❌ Error initializing Firebase:', 'color: red; font-weight: bold;', error);
         showEmptyState();
     }
     
@@ -112,28 +125,37 @@ function showEmptyState() {
 async function loadProductsFromFirebase() {
     try {
         if (!firebaseDB || !firebaseRef || !firebaseGet) {
+            console.error('❌ Firebase not initialized');
             console.log('Firebase not available, using empty product list');
             showEmptyState();
             return;
         }
         
-        console.log('Attempting to load products from Firebase...');
+        console.log('🔄 Attempting to load products from Firebase...');
         const productsRef = firebaseRef(firebaseDB, 'products');
         const snapshot = await firebaseGet(productsRef);
         
         if (snapshot.exists()) {
             const data = snapshot.val();
-            console.log('Firebase data received:', data);
+            console.log('✅ Firebase snapshot received:', data);
+            
+            // Update the local products array from Firebase
             updateProductsFromFirebase(data);
+            
             const allProducts = getAllProducts();
-            console.log('Products loaded from Firebase:', allProducts.length);
-            console.log('All products:', allProducts);
+            console.log('✅ Products loaded from Firebase:', allProducts.length);
+            console.log('📋 All products:', allProducts);
+            
+            if (allProducts.length === 0) {
+                console.warn('⚠️ No products in Firebase');
+                showEmptyState();
+            }
         } else {
-            console.log('No products found in Firebase');
+            console.log('⚠️ No products found in Firebase (snapshot does not exist)');
             showEmptyState();
         }
     } catch (error) {
-        console.error('Error loading products from Firebase:', error);
+        console.error('❌ Error loading products from Firebase:', error);
         showEmptyState();
     }
 }

@@ -742,31 +742,46 @@
         // Load products from Firebase
         async function loadProducts() {
             try {
+                console.log('🔄 Admin: Loading products from Firebase...');
                 const productsRef = window.firebaseRef(window.firebaseDB, 'products');
                 const snapshot = await window.firebaseGet(productsRef);
                 
                 if (snapshot.exists()) {
                     const data = snapshot.val();
+                    console.log('✅ Admin: Firebase snapshot received:', data);
                     currentProducts = [];
                     
                     // Convert Firebase object to array
+                    // Firebase returns objects with numeric keys for each category
                     Object.keys(data).forEach(category => {
-                        if (Array.isArray(data[category])) {
-                            data[category].forEach(product => {
+                        console.log(`📦 Processing category: "${category}"`, data[category]);
+                        const categoryData = data[category];
+                        
+                        if (Array.isArray(categoryData)) {
+                            // Already an array
+                            categoryData.forEach(product => {
+                                currentProducts.push(product);
+                            });
+                        } else if (typeof categoryData === 'object' && categoryData !== null) {
+                            // Firebase object with numeric keys - convert to array
+                            Object.values(categoryData).forEach(product => {
                                 currentProducts.push(product);
                             });
                         }
                     });
+                    
+                    console.log('✅ Admin: Total products loaded:', currentProducts.length);
+                    console.log('📋 Admin: Products:', currentProducts);
                 } else {
                     // If no data in Firebase, start with empty products
                     currentProducts = [];
-                    console.log('No products in Firebase, starting with empty database');
+                    console.log('⚠️ Admin: No products in Firebase, starting with empty database');
                 }
                 
                 displayProducts();
                 updateDashboardStats();
             } catch (error) {
-                console.error('Error loading products from Firebase:', error);
+                console.error('❌ Admin: Error loading products from Firebase:', error);
                 // Start with empty products if Firebase fails
                 currentProducts = [];
                 displayProducts();

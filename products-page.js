@@ -56,27 +56,40 @@ async function initializeFirebase() {
 async function loadProductsFromFirebase() {
     try {
         if (!firebaseDB || !firebaseRef || !firebaseGet) {
+            console.error('❌ Firebase not initialized');
             console.log('Firebase not available, using empty product list');
             displayProducts([]);
             return;
         }
         
+        console.log('🔄 Loading products from Firebase on products page...');
         const productsRef = firebaseRef(firebaseDB, 'products');
         const snapshot = await firebaseGet(productsRef);
         
         if (snapshot.exists()) {
             const data = snapshot.val();
+            console.log('✅ Firebase data received on products page:', data);
+            
+            // Update the local products array from Firebase
             updateProductsFromFirebase(data);
-            console.log('Products loaded from Firebase:', getAllProducts().length);
+            
+            const allProducts = getAllProducts();
+            console.log('✅ Products loaded from Firebase:', allProducts.length);
+            
+            if (allProducts.length === 0) {
+                console.warn('⚠️ No products found in Firebase');
+                showProductsEmptyState();
+                return;
+            }
             
             // Apply filters and display
             applyFilters();
         } else {
-            console.log('No products found in Firebase');
+            console.log('⚠️ No products found in Firebase (snapshot does not exist)');
             showProductsEmptyState();
         }
     } catch (error) {
-        console.error('Error loading products from Firebase:', error);
+        console.error('❌ Error loading products from Firebase:', error);
         displayProducts([]);
     }
 }

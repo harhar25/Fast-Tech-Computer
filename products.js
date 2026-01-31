@@ -142,22 +142,43 @@ async function loadProductsFromFirebase() {
 
 // Update local products array from Firebase data
 function updateProductsFromFirebase(firebaseData) {
+    console.log('🔥 FIREBASE DATA RECEIVED:', firebaseData);
+    
     // Clear existing products
     Object.keys(products).forEach(category => {
         products[category] = [];
     });
     
     // Load products from Firebase
-    if (firebaseData) {
+    if (firebaseData && typeof firebaseData === 'object') {
         Object.keys(firebaseData).forEach(category => {
-            if (products.hasOwnProperty(category) && Array.isArray(firebaseData[category])) {
-                products[category] = firebaseData[category];
+            if (products.hasOwnProperty(category)) {
+                const categoryData = firebaseData[category];
+                
+                // Firebase can return data in two formats:
+                // 1. Array: [{...}, {...}]
+                // 2. Object with numeric keys: {0: {...}, 1: {...}}
+                
+                if (Array.isArray(categoryData)) {
+                    // Already an array, use directly
+                    products[category] = categoryData;
+                    console.log(`✅ Category "${category}" loaded as array: ${categoryData.length} products`);
+                } else if (typeof categoryData === 'object' && categoryData !== null) {
+                    // Convert object to array
+                    const convertedArray = Object.values(categoryData);
+                    products[category] = convertedArray;
+                    console.log(`✅ Category "${category}" converted from object to array: ${convertedArray.length} products`);
+                } else {
+                    console.log(`⚠️ Category "${category}" has invalid data format:`, categoryData);
+                }
             }
         });
     }
     
-    console.log('Products updated from Firebase:', getAllProducts().length, 'products loaded');
-    console.log('Updated products array:', products);
+    const totalProducts = getAllProducts().length;
+    console.log(`✅ Total products loaded: ${totalProducts}`);
+    console.log('📦 Products structure:', products);
+    console.log('📋 All products flattened:', getAllProducts());
 }
 
 // Export for use in other files
