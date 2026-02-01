@@ -1593,6 +1593,11 @@
             localStorage.removeItem('adminLoggedIn');
             localStorage.removeItem('adminUsername');
             
+            // Clear login form fields
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('rememberMe').checked = false;
+            
             showLogin();
         }
     </script>

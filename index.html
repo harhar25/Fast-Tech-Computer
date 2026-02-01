@@ -162,20 +162,20 @@
     </section>
 
     <!-- Newsletter Subscription -->
-    <section class="newsletter-section py-5" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
-        <div class="container">
+    <section class="newsletter-section py-5" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); position: relative;">
+        <div class="container" style="position: relative; z-index: 10;">
             <div class="text-center text-white">
                 <h2 class="mb-3" style="font-size: 2.5rem; font-weight: bold;">Stay Updated</h2>
                 <p class="mb-5" style="font-size: 1.1rem; color: #ddd;">Get the latest deals and new product alerts delivered to your inbox</p>
                 <div class="row justify-content-center">
-                    <div class="col-md-8">
-                        <form id="newsletterForm" class="d-flex gap-2 flex-column flex-sm-row">
+                    <div class="col-md-8" style="position: relative; z-index: 10;">
+                        <form id="newsletterForm" class="d-flex gap-2 flex-column flex-sm-row" style="position: relative; z-index: 10;">
                             <input type="email" class="form-control" id="subscriberEmail" placeholder="Enter your email" required style="padding: 12px 20px; font-size: 1rem; border: none; border-radius: 8px; flex: 1; position: relative; z-index: 10; pointer-events: auto;">
-                            <button type="button" class="btn btn-primary" onclick="handleSubscription(event)" style="padding: 12px 30px; font-size: 1.05rem; border-radius: 8px; white-space: nowrap; cursor: pointer;">
+                            <button type="button" class="btn btn-primary" onclick="handleSubscription(event)" style="padding: 12px 30px; font-size: 1.05rem; border-radius: 8px; white-space: nowrap; cursor: pointer; position: relative; z-index: 10; pointer-events: auto;">
                                 <i class="bi bi-send"></i> Subscribe
                             </button>
                         </form>
-                        <small id="subscriptionMessage" class="text-warning mt-3" style="display: none;"></small>
+                        <small id="subscriptionMessage" class="text-warning mt-3" style="display: none; position: relative; z-index: 10;"></small>
                     </div>
                 </div>
             </div>
