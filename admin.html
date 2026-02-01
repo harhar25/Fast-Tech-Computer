@@ -793,6 +793,15 @@
                         const editProductModal = document.getElementById('editProductModal');
                         if (editProductModal) {
                             editModal = new bootstrap.Modal(editProductModal);
+                            
+                            // Fix aria-hidden accessibility issue by blurring focused elements before modal hides
+                            editProductModal.addEventListener('hide.bs.modal', function() {
+                                const activeElement = document.activeElement;
+                                if (activeElement) {
+                                    activeElement.blur();
+                                }
+                            });
+                            
                             console.log('%c✅ Edit modal initialized', 'color: green;');
                         } else {
                             console.error('%c❌ editProductModal not found', 'color: red;');
