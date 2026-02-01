@@ -110,6 +110,8 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-lg);
   transition: all 150ms ease;
+  position: relative;
+  z-index: 100;
 }
 
 .search-icon {
@@ -836,10 +838,11 @@ body {
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  z-index: 1020;
+  z-index: 1050;
   max-height: 400px;
   overflow-y: auto;
   margin-top: 5px;
+  min-width: 100%;
 }
 
 .search-result-item {

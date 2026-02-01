@@ -15,6 +15,21 @@ document.addEventListener('DOMContentLoaded', async function() {
     initializeSearch();
 });
 
+// Change carousel image by thumbnail click
+function changeCarouselImage(index) {
+    const carousel = document.getElementById('productCarousel');
+    if (carousel) {
+        const bootstrapCarousel = new bootstrap.Carousel(carousel);
+        bootstrapCarousel.to(index);
+        
+        // Highlight active thumbnail
+        document.querySelectorAll('.image-thumbnails img').forEach((thumb, idx) => {
+            thumb.classList.toggle('border-primary', idx === index);
+            thumb.style.borderWidth = idx === index ? '3px' : '1px';
+        });
+    }
+}
+
 // Initialize Firebase for product detail page
 async function initializeFirebaseForProductDetail() {
     try {
@@ -147,12 +162,53 @@ function displayProductDetails(product) {
         `;
     }).join('');
     
+    // Build image carousel HTML
+    const images = product.images && product.images.length > 0 ? product.images : 
+        [{url: product.image, order: 0}];
+    
+    const carouselItemsHtml = images.map((img, idx) => `
+        <div class="carousel-item ${idx === 0 ? 'active' : ''}">
+            <img src="${img.url}" alt="${product.name} - Image ${idx + 1}" class="d-block w-100 rounded">
+        </div>
+    `).join('');
+    
+    const thumbnailsHtml = images.length > 1 ? `
+        <div class="image-thumbnails mt-2 d-flex gap-2 flex-wrap" style="max-width: 400px;">
+            ${images.map((img, idx) => `
+                <img src="${img.url}" alt="Thumbnail ${idx + 1}" 
+                     class="img-thumbnail cursor-pointer" 
+                     style="width: 70px; height: 70px; object-fit: cover; cursor: pointer;"
+                     onclick="changeCarouselImage(${idx})"
+                     id="thumb-${idx}">
+            `).join('')}
+        </div>
+    ` : '';
+    
+    const imageCarouselHtml = images.length > 1 ? `
+        <div id="productCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                ${carouselItemsHtml}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true"></span>
+            </button>
+        </div>
+        ${thumbnailsHtml}
+    ` : `
+        <div class="product-image-large">
+            <img src="${product.image}" alt="${product.name}" class="img-fluid rounded w-100">
+        </div>
+    `;
+    
     container.innerHTML = `
         <div class="col-lg-6 mb-4">
-            <div class="product-image-large">
-                <img src="${product.image}" alt="${product.name}" class="img-fluid rounded">
-                ${badgeHtml}
+            <div class="product-image-section">
+                ${imageCarouselHtml}
             </div>
+            ${badgeHtml}
         </div>
         <div class="col-lg-6">
             <div class="product-info">

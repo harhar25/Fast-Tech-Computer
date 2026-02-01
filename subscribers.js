@@ -5,8 +5,16 @@ let subscribersDB, subscribersRef, subscribersPush, subscribersGet;
 function initializeEmailJS() {
     try {
         // Initialize EmailJS with your public key
+        // To use your own EmailJS account:
+        // 1. Sign up at https://www.emailjs.com/
+        // 2. Create a Service (Gmail, Outlook, etc.)
+        // 3. Create a Template with variables like: {{to_email}}, {{product_name}}, {{product_description}}, {{product_price}}
+        // 4. Replace 'mV-dJXKqQ0D6cG8H9' with your public key
+        // 5. Replace 'service_fast_tech' with your service ID
+        // 6. Replace 'template_new_product' with your template ID
+        
         emailjs.init({
-            publicKey: 'mV-dJXKqQ0D6cG8H9'
+            publicKey: 'tt1lZ0AV5V-8OdX76'  // Fast Tech EmailJS public key
         });
         console.log('%c✅ EmailJS initialized', 'color: green;');
     } catch (error) {
@@ -191,17 +199,18 @@ async function notifySubscribersAboutNewProduct(productName, productDescription,
         let emailsSent = 0;
         for (const subscriber of subscribers) {
             try {
-                // Send email using EmailJS
-                await emailjs.send('service_fast_tech', 'template_new_product', {
+                // Send email using EmailJS for new product notifications
+                const response = await emailjs.send('service_fast_tech', 'template_imne3bp', {
                     to_email: subscriber.email,
                     product_name: productName,
                     product_description: productDescription,
-                    product_price: productPrice,
+                    product_price: '₱' + parseFloat(productPrice).toFixed(2),
                     store_name: 'Fast Tech',
-                    store_link: window.location.origin
+                    store_link: window.location.origin,
+                    message_type: 'New Product Alert'
                 });
                 emailsSent++;
-                console.log('%c✉️ Email sent to:', 'color: green;', subscriber.email);
+                console.log('%c✉️ Email sent to:', 'color: green;', subscriber.email, 'Response:', response);
             } catch (emailError) {
                 console.warn('%c⚠️ Failed to send email to', 'color: orange;', subscriber.email, emailError);
             }
@@ -222,6 +231,69 @@ async function notifySubscribersAboutNewProduct(productName, productDescription,
             message: 'Error sending notifications',
             error: error
         };
+    }
+}
+
+// Notify subscribers about price changes
+async function notifySubscribersAboutPriceChange(productName, oldPrice, newPrice) {
+    try {
+        console.log('%c💰 Preparing to notify subscribers about price change...', 'color: blue;');
+        
+        const subscribers = await getActiveSubscribers();
+        
+        if (subscribers.length === 0) {
+            console.log('%c ℹ️ No active subscribers to notify', 'color: orange;');
+            return { success: false };
+        }
+        
+        // Create notification record
+        const notification = {
+            type: 'price_change',
+            productName: productName,
+            oldPrice: oldPrice,
+            newPrice: newPrice,
+            priceDifference: newPrice - oldPrice,
+            sentAt: new Date().toISOString(),
+            recipientCount: subscribers.length
+        };
+        
+        // Store notification in Firebase
+        const notificationsRef = subscribersRef(subscribersDB, 'notifications');
+        await subscribersPush(notificationsRef, notification);
+        
+        // Send actual emails using EmailJS
+        let emailsSent = 0;
+        for (const subscriber of subscribers) {
+            try {
+                const priceStatus = newPrice < oldPrice ? 'PRICE DROP! 🎉' : 'Price Update';
+                await emailjs.send('service_fast_tech', 'template_imne3bp', {
+                    to_email: subscriber.email,
+                    product_name: productName,
+                    old_price: '₱' + parseFloat(oldPrice).toFixed(2),
+                    new_price: '₱' + parseFloat(newPrice).toFixed(2),
+                    price_difference: '₱' + Math.abs(newPrice - oldPrice).toFixed(2),
+                    price_status: priceStatus,
+                    store_name: 'Fast Tech',
+                    store_link: window.location.origin,
+                    message_type: 'Price Change Alert'
+                });
+                emailsSent++;
+                console.log('%c✉️ Price change email sent to:', 'color: green;', subscriber.email);
+            } catch (emailError) {
+                console.warn('%c⚠️ Failed to send price change email to', 'color: orange;', subscriber.email, emailError);
+            }
+        }
+        
+        console.log('%c✅ Price change notification completed:', 'color: green;', `${emailsSent} emails sent`);
+        
+        return {
+            success: true,
+            subscriberCount: emailsSent
+        };
+        
+    } catch (error) {
+        console.error('%c❌ Error notifying about price change:', 'color: red;', error);
+        return { success: false };
     }
 }
 
