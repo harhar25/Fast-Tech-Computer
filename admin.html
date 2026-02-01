@@ -1531,7 +1531,12 @@
         // Edit product
         function editProduct(productId) {
             const product = currentProducts.find(p => p.id === productId);
-            if (!product) return;
+            if (!product) {
+                console.error('Product not found:', productId);
+                return;
+            }
+            
+            console.log('%c📝 Editing product:', 'color: blue;', product);
             
             // Populate form
             document.getElementById('editProductId').value = product.id;
@@ -1541,10 +1546,50 @@
             document.getElementById('editProductPrice').value = product.price;
             document.getElementById('editProductDescription').value = product.description;
             loadSpecsIntoForm(product.specs, 'editSpecsContainer');
-            document.getElementById('editProductImage').value = product.image;
             document.getElementById('editProductOriginalPrice').value = product.originalPrice || '';
             document.getElementById('editProductBadge').value = product.badge || '';
             document.getElementById('editProductInStock').value = product.inStock !== false ? 'true' : 'false';
+            
+            // Load existing images
+            document.getElementById('editProductImageFiles').value = '';  // Clear file input
+            const imageList = document.getElementById('editImageList');
+            const imagesHidden = document.getElementById('editProductImages');
+            
+            if (product.images && product.images.length > 0) {
+                // Display existing images
+                const existingImages = product.images.map((img, idx) => {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = 'mb-3 p-3 border rounded position-relative';
+                    if (idx === 0) {
+                        imgContainer.className += ' border-primary bg-light';
+                    }
+                    
+                    imgContainer.innerHTML = `
+                        <div class="row">
+                            <div class="col-md-3">
+                                <img src="${img.url}" alt="Image ${idx + 1}" style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px;">
+                            </div>
+                            <div class="col-md-9">
+                                <h6 class="mb-2">Image ${idx + 1}</h6>
+                                <small class="text-muted d-block">Existing image</small>
+                                ${idx === 0 ? '<span class="badge bg-primary">Main Image</span>' : ''}
+                                <button type="button" class="btn btn-sm btn-danger mt-2" onclick="removeImage(this, 'edit')">Remove</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    return imgContainer;
+                });
+                
+                imageList.innerHTML = '';
+                existingImages.forEach(imgContainer => imageList.appendChild(imgContainer));
+                
+                // Store existing images in hidden field
+                imagesHidden.value = JSON.stringify(product.images);
+            } else {
+                imageList.innerHTML = '';
+                imagesHidden.value = '';
+            }
             
             // Show modal
             editModal.show();
@@ -1555,27 +1600,39 @@
             const productId = document.getElementById('editProductId').value;
             const productIndex = currentProducts.findIndex(p => p.id === productId);
             
-            if (productIndex === -1) return;
-            
-            // Get multiple images
-            const imagesJson = document.getElementById('editProductImages').value;
-            let newImages = [];
-            if (imagesJson) {
-                try {
-                    newImages = JSON.parse(imagesJson);
-                } catch (e) {
-                    console.warn('Error parsing images:', e);
-                }
+            if (productIndex === -1) {
+                console.error('Product not found for update');
+                return;
             }
             
-            // Use existing images if no new ones uploaded
-            let images = newImages.length > 0 ? 
-                newImages.map((img, idx) => ({
-                    url: img.base64,
-                    order: idx,
-                    uploadedAt: new Date().toISOString()
-                })) : 
-                (currentProducts[productIndex].images || []);
+            // Get multiple images - check for new uploads first
+            const imagesJson = document.getElementById('editProductImages').value;
+            let images = [];
+            
+            if (imagesJson) {
+                try {
+                    const parsedImages = JSON.parse(imagesJson);
+                    // Check if these are newly uploaded images (have base64) or existing ones
+                    if (parsedImages.length > 0 && parsedImages[0].base64) {
+                        // New images uploaded
+                        images = parsedImages.map((img, idx) => ({
+                            url: img.base64,
+                            order: idx,
+                            uploadedAt: new Date().toISOString()
+                        }));
+                    } else {
+                        // Existing images or mixed
+                        images = parsedImages;
+                    }
+                } catch (e) {
+                    console.warn('Error parsing images:', e);
+                    // Keep existing images
+                    images = currentProducts[productIndex].images || [];
+                }
+            } else {
+                // No images in form, keep existing
+                images = currentProducts[productIndex].images || [];
+            }
             
             const mainImage = images.length > 0 ? images[0].url : currentProducts[productIndex].image;
             
@@ -1598,6 +1655,8 @@
                 // Update in Firebase - handle category change
                 const oldCategory = currentProducts[productIndex].category;
                 const newCategory = updatedProduct.category;
+                
+                console.log('%c💾 Updating product:', 'color: blue;', updatedProduct);
                 
                 // If category changed, remove from old category
                 if (oldCategory !== newCategory) {
@@ -1648,15 +1707,16 @@
                 }
                 
                 await window.firebaseSet(newCategoryRef, categoryProducts);
+                console.log('%c✅ Product updated in Firebase', 'color: green;');
                 
                 // Update local products array
+                const oldPrice = currentProducts[productIndex].price;
                 currentProducts[productIndex] = updatedProduct;
                 
                 // Check if price changed and notify subscribers
-                const oldPrice = currentProducts[productIndex].price;
                 const newPrice = updatedProduct.price;
-                if (oldPrice !== newPrice) {
-                    console.log('%c💰 Price change detected!', 'color: blue;', `from ${oldPrice} to ${newPrice}`);
+                if (Math.abs(oldPrice - newPrice) > 0.01) {  // Account for floating point precision
+                    console.log('%c💰 Price change detected!', 'color: blue;', `from ₱${oldPrice} to ₱${newPrice}`);
                     if (typeof notifySubscribersAboutPriceChange === 'function') {
                         notifySubscribersAboutPriceChange(updatedProduct.name, oldPrice, newPrice)
                             .then(result => {
@@ -1672,6 +1732,12 @@
                 // Reload and close modal
                 await loadProducts();
                 editModal.hide();
+                showAlert('✅ Product updated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('%c❌ Error updating product:', 'color: red;', error);
+                showAlert('Error updating product: ' + error.message, 'danger');
+            }
                 
                 showAlert('Product updated successfully in Firebase!', 'success');
             } catch (error) {
