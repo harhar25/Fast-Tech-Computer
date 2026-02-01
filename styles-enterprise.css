@@ -682,6 +682,11 @@ body {
   animation: slideInUp 0.8s ease-out both;
 }
 
+/* Hide dropdown arrow on navbar */
+.navbar-nav .dropdown-toggle::after {
+  display: none;
+}
+
 .product-card::before {
   content: '';
   position: absolute;

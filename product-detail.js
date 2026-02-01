@@ -118,7 +118,7 @@ function displayProductDetails(product) {
         `<span class="product-badge badge-${product.badge}">${product.badge.toUpperCase()}</span>` : '';
     
     const originalPriceHtml = product.originalPrice ? 
-        `<span class="original-price">$${product.originalPrice.toFixed(2)}</span>` : '';
+        `<span class="original-price">₱${product.originalPrice.toFixed(2)}</span>` : '';
     
     // Use placeholder rating for now - will be updated after reviews load
     const ratingHtml = createRatingStars(0);
