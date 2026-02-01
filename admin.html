@@ -777,12 +777,35 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            // Wait a bit for Firebase to load
-            setTimeout(() => {
-                checkAuth();
-                initializeEventListeners();
-                editModal = new bootstrap.Modal(document.getElementById('editProductModal'));
-            }, 500);
+            try {
+                console.log('%c🔄 Admin page DOMContentLoaded - Starting initialization...', 'color: blue; font-weight: bold;');
+                
+                // Wait a bit for Firebase to load
+                setTimeout(() => {
+                    try {
+                        console.log('%c✓ Checking authentication...', 'color: blue;');
+                        checkAuth();
+                        
+                        console.log('%c✓ Initializing event listeners...', 'color: blue;');
+                        initializeEventListeners();
+                        
+                        console.log('%c✓ Initializing edit modal...', 'color: blue;');
+                        const editProductModal = document.getElementById('editProductModal');
+                        if (editProductModal) {
+                            editModal = new bootstrap.Modal(editProductModal);
+                            console.log('%c✅ Edit modal initialized', 'color: green;');
+                        } else {
+                            console.error('%c❌ editProductModal not found', 'color: red;');
+                        }
+                        
+                        console.log('%c✅ Admin initialization complete!', 'color: green; font-weight: bold;');
+                    } catch (initError) {
+                        console.error('%c❌ Error during initialization:', 'color: red; font-weight: bold;', initError);
+                    }
+                }, 500);
+            } catch (error) {
+                console.error('%c❌ Error in DOMContentLoaded:', 'color: red; font-weight: bold;', error);
+            }
         });
 
         // Check authentication
@@ -815,69 +838,87 @@
 
         // Initialize event listeners
         function initializeEventListeners() {
-            // Login form
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                const alertDiv = document.getElementById('loginAlert');
-                
-                if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-                    // Store login session
-                    sessionStorage.setItem('adminLoggedIn', 'true');
-                    sessionStorage.setItem('adminUsername', username);
-                    
-                    // Remember me functionality
-                    if (document.getElementById('rememberMe').checked) {
-                        localStorage.setItem('adminLoggedIn', 'true');
-                        localStorage.setItem('adminUsername', username);
-                    }
-                    
-                    // Show dashboard
-                    showDashboard();
-                    loadProducts();
-                    updateDashboardStats();
-                } else {
-                    alertDiv.textContent = 'Invalid username or password';
-                    alertDiv.classList.remove('d-none');
-                    
-                    // Hide alert after 3 seconds
-                    setTimeout(() => {
-                        alertDiv.classList.add('d-none');
-                    }, 3000);
+            try {
+                // Login form
+                const loginForm = document.getElementById('loginForm');
+                if (loginForm) {
+                    loginForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        const username = document.getElementById('username').value;
+                        const password = document.getElementById('password').value;
+                        const alertDiv = document.getElementById('loginAlert');
+                        
+                        if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                            // Store login session
+                            sessionStorage.setItem('adminLoggedIn', 'true');
+                            sessionStorage.setItem('adminUsername', username);
+                            
+                            // Remember me functionality
+                            if (document.getElementById('rememberMe').checked) {
+                                localStorage.setItem('adminLoggedIn', 'true');
+                                localStorage.setItem('adminUsername', username);
+                            }
+                            
+                            // Show dashboard
+                            showDashboard();
+                            loadProducts();
+                            updateDashboardStats();
+                        } else {
+                            alertDiv.textContent = 'Invalid username or password';
+                            alertDiv.classList.remove('d-none');
+                            
+                            // Hide alert after 3 seconds
+                            setTimeout(() => {
+                                alertDiv.classList.add('d-none');
+                            }, 3000);
+                        }
+                    });
                 }
-            });
 
-            // Navigation
-            document.querySelectorAll('.sidebar .nav-link[data-section]').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const section = this.dataset.section;
-                    showContentSection(section);
-                    
-                    // Update active state
-                    document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
-                    this.classList.add('active');
+                // Navigation
+                document.querySelectorAll('.sidebar .nav-link[data-section]').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const section = this.dataset.section;
+                        showContentSection(section);
+                        
+                        // Update active state
+                        document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+                    });
                 });
-            });
 
-            // Product search
-            document.getElementById('productSearch').addEventListener('input', function() {
-                filterProducts(this.value);
-            });
+                // Product search
+                const productSearch = document.getElementById('productSearch');
+                if (productSearch) {
+                    productSearch.addEventListener('input', function() {
+                        filterProducts(this.value);
+                    });
+                }
 
-            // Add product form
-            document.getElementById('addProductForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                addProduct();
-            });
+                // Add product form
+                const addProductForm = document.getElementById('addProductForm');
+                if (addProductForm) {
+                    addProductForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        addProduct();
+                    });
+                }
 
-            // Edit product form
-            document.getElementById('editProductForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                updateProduct();
-            });
+                // Edit product form
+                const editProductForm = document.getElementById('editProductForm');
+                if (editProductForm) {
+                    editProductForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        updateProduct();
+                    });
+                }
+                
+                console.log('%c✅ Event listeners initialized', 'color: green;');
+            } catch (error) {
+                console.error('%c❌ Error initializing event listeners:', 'color: red;', error);
+            }
         }
 
         // Show content section
@@ -1530,69 +1571,75 @@
 
         // Edit product
         function editProduct(productId) {
-            const product = currentProducts.find(p => p.id === productId);
-            if (!product) {
-                console.error('Product not found:', productId);
-                return;
-            }
-            
-            console.log('%c📝 Editing product:', 'color: blue;', product);
-            
-            // Populate form
-            document.getElementById('editProductId').value = product.id;
-            document.getElementById('editProductName').value = product.name;
-            document.getElementById('editProductBrand').value = product.brand;
-            document.getElementById('editProductCategory').value = product.category;
-            document.getElementById('editProductPrice').value = product.price;
-            document.getElementById('editProductDescription').value = product.description;
-            loadSpecsIntoForm(product.specs, 'editSpecsContainer');
-            document.getElementById('editProductOriginalPrice').value = product.originalPrice || '';
-            document.getElementById('editProductBadge').value = product.badge || '';
-            document.getElementById('editProductInStock').value = product.inStock !== false ? 'true' : 'false';
-            
-            // Load existing images
-            document.getElementById('editProductImageFiles').value = '';  // Clear file input
-            const imageList = document.getElementById('editImageList');
-            const imagesHidden = document.getElementById('editProductImages');
-            
-            if (product.images && product.images.length > 0) {
-                // Display existing images
-                const existingImages = product.images.map((img, idx) => {
-                    const imgContainer = document.createElement('div');
-                    imgContainer.className = 'mb-3 p-3 border rounded position-relative';
-                    if (idx === 0) {
-                        imgContainer.className += ' border-primary bg-light';
-                    }
-                    
-                    imgContainer.innerHTML = `
-                        <div class="row">
-                            <div class="col-md-3">
-                                <img src="${img.url}" alt="Image ${idx + 1}" style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px;">
-                            </div>
-                            <div class="col-md-9">
-                                <h6 class="mb-2">Image ${idx + 1}</h6>
-                                <small class="text-muted d-block">Existing image</small>
-                                ${idx === 0 ? '<span class="badge bg-primary">Main Image</span>' : ''}
-                                <button type="button" class="btn btn-sm btn-danger mt-2" onclick="removeImage(this, 'edit')">Remove</button>
-                            </div>
-                        </div>
-                    `;
-                    
-                    return imgContainer;
-                });
+            try {
+                const product = currentProducts.find(p => p.id === productId);
+                if (!product) {
+                    console.error('Product not found:', productId);
+                    showAlert('Product not found', 'danger');
+                    return;
+                }
                 
-                imageList.innerHTML = '';
-                existingImages.forEach(imgContainer => imageList.appendChild(imgContainer));
+                console.log('%c📝 Editing product:', 'color: blue;', product);
                 
-                // Store existing images in hidden field
-                imagesHidden.value = JSON.stringify(product.images);
-            } else {
-                imageList.innerHTML = '';
-                imagesHidden.value = '';
+                // Populate form - safely handle each field
+                const editProductId = document.getElementById('editProductId');
+                const editProductName = document.getElementById('editProductName');
+                const editProductBrand = document.getElementById('editProductBrand');
+                const editProductCategory = document.getElementById('editProductCategory');
+                const editProductPrice = document.getElementById('editProductPrice');
+                const editProductDescription = document.getElementById('editProductDescription');
+                const editProductOriginalPrice = document.getElementById('editProductOriginalPrice');
+                const editProductBadge = document.getElementById('editProductBadge');
+                const editProductInStock = document.getElementById('editProductInStock');
+                const editProductImageFiles = document.getElementById('editProductImageFiles');
+                const editImageList = document.getElementById('editImageList');
+                const editProductImages = document.getElementById('editProductImages');
+                
+                // Verify all elements exist
+                if (!editProductId || !editProductName || !editProductBrand || !editProductCategory || 
+                    !editProductPrice || !editProductDescription || !editProductImages) {
+                    console.error('Some form elements are missing');
+                    showAlert('Form elements not found', 'danger');
+                    return;
+                }
+                
+                // Set values
+                editProductId.value = product.id || '';
+                editProductName.value = product.name || '';
+                editProductBrand.value = product.brand || '';
+                editProductCategory.value = product.category || '';
+                editProductPrice.value = product.price || '';
+                editProductDescription.value = product.description || '';
+                
+                // Load specs
+                if (product.specs) {
+                    loadSpecsIntoForm(product.specs, 'editSpecsContainer');
+                }
+                
+                editProductOriginalPrice.value = product.originalPrice || '';
+                editProductBadge.value = product.badge || '';
+                editProductInStock.value = product.inStock !== false ? 'true' : 'false';
+                
+                // Clear file input and image list
+                editProductImageFiles.value = '';
+                editImageList.innerHTML = '';
+                
+                // Store existing images if they exist
+                if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+                    editProductImages.value = JSON.stringify(product.images);
+                    console.log('%c📸 Existing images loaded:', 'color: green;', product.images.length, 'images');
+                } else {
+                    editProductImages.value = '';
+                }
+                
+                // Show modal
+                editModal.show();
+                console.log('%c✅ Edit modal opened', 'color: green;');
+                
+            } catch (error) {
+                console.error('%c❌ Error in editProduct:', 'color: red;', error);
+                showAlert('Error opening product editor: ' + error.message, 'danger');
             }
-            
-            // Show modal
-            editModal.show();
         }
 
         // Update product in Firebase
@@ -1737,12 +1784,6 @@
             } catch (error) {
                 console.error('%c❌ Error updating product:', 'color: red;', error);
                 showAlert('Error updating product: ' + error.message, 'danger');
-            }
-                
-                showAlert('Product updated successfully in Firebase!', 'success');
-            } catch (error) {
-                console.error('Error updating product in Firebase:', error);
-                showAlert('Error updating product. Please try again.', 'danger');
             }
         }
 

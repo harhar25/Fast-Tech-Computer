@@ -26,7 +26,7 @@ function initializeEmailJS() {
 async function initializeSubscriberSystem() {
     try {
         console.log('%c📧 Initializing Subscriber System...', 'color: blue; font-weight: bold;');
-        const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js");
+        const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js");
         const { getDatabase, ref, push, get } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js");
         
         const firebaseConfig = {
@@ -39,7 +39,16 @@ async function initializeSubscriberSystem() {
             appId: "1:503689724923:web:0c6196cdffc88905dc415e"
         };
         
-        const app = initializeApp(firebaseConfig);
+        // Check if Firebase app already exists
+        let app;
+        if (getApps && getApps().length > 0) {
+            console.log('%c✓ Firebase app already initialized, reusing...', 'color: blue;');
+            app = getApps()[0];
+        } else {
+            console.log('%c✓ Initializing new Firebase app...', 'color: blue;');
+            app = initializeApp(firebaseConfig);
+        }
+        
         subscribersDB = getDatabase(app);
         subscribersRef = ref;
         subscribersPush = push;
