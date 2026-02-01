@@ -316,7 +316,9 @@ function createProductCard(product) {
     return `
         <div class="product-card" data-product-id="${product.id}">
             <div class="product-image">
-                <img src="${product.image}" alt="${product.name}">
+                <a href="product.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+                    <img src="${product.image}" alt="${product.name}" style="cursor: pointer;">
+                </a>
                 ${badgeHtml}
                 <div class="product-quick-actions">
                     <button class="quick-action-btn" onclick="handleOrderClick('${product.name}')" title="Make an Order for this Item">
