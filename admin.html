@@ -314,6 +314,42 @@
                 font-size: 0.875rem;
             }
         }
+        
+        /* Specs Input Styles */
+        .specs-input-container {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #f8f9fa;
+        }
+        
+        .spec-field {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: flex-end;
+        }
+        
+        .spec-field input {
+            flex: 1;
+        }
+        
+        .spec-field .spec-label-input {
+            flex: 0 0 40%;
+        }
+        
+        .spec-field .spec-value-input {
+            flex: 0 0 50%;
+        }
+        
+        .spec-field .btn-remove-spec {
+            flex: 0 0 auto;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .spec-label-dropdown {
+            flex: 0 0 40% !important;
+        }
     </style>
 </head>
 <body>
@@ -551,9 +587,13 @@
                                 <textarea class="form-control" id="newProductDescription" rows="3" required></textarea>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Specifications (JSON format)</label>
-                                <textarea class="form-control" id="newProductSpecs" rows="4" placeholder='{"cores": "8", "clock": "3.5GHz", "cache": "16MB"}'></textarea>
-                                <small class="form-text text-muted">Enter product specifications in JSON format. Example: {"cores": "8", "clock": "3.5GHz", "cache": "16MB"}</small>
+                                <label class="form-label">Technical Specifications</label>
+                                <div id="specsContainer" class="specs-input-container">
+                                    <!-- Specs fields will be added here -->
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addSpecField()">
+                                    <i class="bi bi-plus"></i> Add Specification
+                                </button>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Product Image</label>
@@ -635,9 +675,13 @@
                             <textarea class="form-control" id="editProductDescription" rows="3" required></textarea>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Specifications (JSON format)</label>
-                            <textarea class="form-control" id="editProductSpecs" rows="4" placeholder='{"cores": "8", "clock": "3.5GHz", "cache": "16MB"}'></textarea>
-                            <small class="form-text text-muted">Enter product specifications in JSON format. Example: {"cores": "8", "clock": "3.5GHz", "cache": "16MB"}</small>
+                            <label class="form-label">Technical Specifications</label>
+                            <div id="editSpecsContainer" class="specs-input-container">
+                                <!-- Specs fields will be added here -->
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addEditSpecField()">
+                                <i class="bi bi-plus"></i> Add Specification
+                            </button>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Product Image</label>
@@ -897,7 +941,135 @@
             showContentSection('add-product');
             document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
             document.querySelector('.sidebar .nav-link[data-section="add-product"]').classList.add('active');
+            initializeSpecsFields();
         }
+        
+        // Common tech spec labels for dropdown
+        const SPEC_LABELS = [
+            'Processor Name', 'Brand', 'Cores', 'Threads', 'Base Clock (GHz)', 'Boost Clock (GHz)',
+            'Cache (MB)', 'TDP (W)', 'Architecture', 'Socket', 'Lithography (nm)',
+            'Codename', 'Device ID', 'Graphics', 'Max Resolution', 'Video Memory (GB)',
+            'Memory Type', 'Memory Speed (MHz)', 'Max Memory (GB)', 'Memory Channels',
+            'Storage Capacity', 'Storage Type', 'Interface', 'Read Speed (MB/s)', 'Write Speed (MB/s)',
+            'Form Factor', 'Warranty', 'In Stock', 'Manufacturer', 'Product Line',
+            'Launch Date', 'Power Consumption', 'Operating Temperature', 'Connectivity',
+            'AI Features', 'Manufacturing', 'Efficient Cores', 'Performance Cores',
+            'Frequencies', 'Launch Info', 'Use Conditions', 'Vertical Segment',
+            'Overall Peak TOPS', 'ECC Memory Supported', 'Quick Sync Video'
+        ];
+        
+        // Initialize specs fields on page load
+        function initializeSpecsFields() {
+            const container = document.getElementById('specsContainer');
+            if (container && container.children.length === 0) {
+                addSpecField();
+            }
+        }
+        
+        // Add a new specification field
+        function addSpecField() {
+            const container = document.getElementById('specsContainer');
+            const fieldId = 'spec-' + Date.now();
+            
+            const specField = document.createElement('div');
+            specField.className = 'spec-field';
+            specField.id = fieldId;
+            specField.innerHTML = `
+                <select class="form-control spec-label-input spec-label-dropdown" data-spec-id="${fieldId}">
+                    <option value="">Select Label</option>
+                    ${SPEC_LABELS.map(label => `<option value="${label}">${label}</option>`).join('')}
+                </select>
+                <input type="text" class="form-control spec-value-input" placeholder="Enter value" data-spec-id="${fieldId}">
+                <button type="button" class="btn btn-sm btn-danger btn-remove-spec" onclick="removeSpecField('${fieldId}')">
+                    <i class="bi bi-trash"></i>
+                </button>
+            `;
+            
+            container.appendChild(specField);
+        }
+        
+        // Remove a specification field
+        function removeSpecField(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.remove();
+            }
+        }
+        
+        // Add a new specification field in edit modal
+        function addEditSpecField() {
+            const container = document.getElementById('editSpecsContainer');
+            const fieldId = 'editspec-' + Date.now();
+            
+            const specField = document.createElement('div');
+            specField.className = 'spec-field';
+            specField.id = fieldId;
+            specField.innerHTML = `
+                <select class="form-control spec-label-input spec-label-dropdown" data-spec-id="${fieldId}">
+                    <option value="">Select Label</option>
+                    ${SPEC_LABELS.map(label => `<option value="${label}">${label}</option>`).join('')}
+                </select>
+                <input type="text" class="form-control spec-value-input" placeholder="Enter value" data-spec-id="${fieldId}">
+                <button type="button" class="btn btn-sm btn-danger btn-remove-spec" onclick="removeSpecField('${fieldId}')">
+                    <i class="bi bi-trash"></i>
+                </button>
+            `;
+            
+            container.appendChild(specField);
+        }
+        
+        // Get specs from form fields
+        function getSpecsFromForm(containerId = 'specsContainer') {
+            const container = document.getElementById(containerId);
+            const specs = {};
+            
+            container.querySelectorAll('.spec-field').forEach(field => {
+                const labelSelect = field.querySelector('.spec-label-dropdown');
+                const valueInput = field.querySelector('.spec-value-input');
+                
+                if (labelSelect && valueInput && labelSelect.value && valueInput.value) {
+                    const label = labelSelect.value.toLowerCase().replace(/\s+/g, '_').replace(/[()]/g, '');
+                    specs[label] = valueInput.value;
+                }
+            });
+            
+            return specs;
+        }
+        
+        // Load specs into form fields
+        function loadSpecsIntoForm(specs, containerId = 'specsContainer') {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            if (!specs || Object.keys(specs).length === 0) {
+                addSpecField();
+                return;
+            }
+            
+            Object.entries(specs).forEach(([key, value]) => {
+                const fieldId = 'spec-' + Date.now() + Math.random();
+                const specField = document.createElement('div');
+                specField.className = 'spec-field';
+                specField.id = fieldId;
+                
+                // Convert key back to label format
+                const label = key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                
+                specField.innerHTML = `
+                    <select class="form-control spec-label-input spec-label-dropdown" data-spec-id="${fieldId}">
+                        <option value="">Select Label</option>
+                        ${SPEC_LABELS.map(l => `<option value="${l}" ${l.toLowerCase().replace(/\s+/g, '_').replace(/[()]/g, '') === key ? 'selected' : ''}>${l}</option>`).join('')}
+                    </select>
+                    <input type="text" class="form-control spec-value-input" placeholder="Enter value" value="${value}" data-spec-id="${fieldId}">
+                    <button type="button" class="btn btn-sm btn-danger btn-remove-spec" onclick="removeSpecField('${fieldId}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                `;
+                
+                container.appendChild(specField);
+            });
+        }
+        
 
         // Load products from Firebase
         async function loadProducts() {
@@ -1156,12 +1328,11 @@
                 const category = document.getElementById('newProductCategory').value;
                 const price = document.getElementById('newProductPrice').value;
                 const description = document.getElementById('newProductDescription').value;
-                const specsText = document.getElementById('newProductSpecs').value;
                 const image = document.getElementById('newProductImage').value; // This now contains base64 data
                 const originalPrice = document.getElementById('newProductOriginalPrice').value;
                 const badge = document.getElementById('newProductBadge').value;
                 
-                console.log('Form values:', { name, brand, category, price, description, specsText });
+                console.log('Form values:', { name, brand, category, price, description });
                 
                 // Validate required fields
                 if (!name || !brand || !category || !price || !description) {
@@ -1169,16 +1340,8 @@
                     return;
                 }
                 
-                // Parse specs JSON
-                let specs = {};
-                if (specsText.trim()) {
-                    try {
-                        specs = JSON.parse(specsText);
-                    } catch (error) {
-                        showAlert('Invalid JSON format in specifications field. Please check your input.', 'warning');
-                        return;
-                    }
-                }
+                // Get specs from form fields
+                const specs = getSpecsFromForm('specsContainer');
                 
                 const newProduct = {
                     id: 'prod-' + Date.now(),
@@ -1253,7 +1416,7 @@
             document.getElementById('editProductCategory').value = product.category;
             document.getElementById('editProductPrice').value = product.price;
             document.getElementById('editProductDescription').value = product.description;
-            document.getElementById('editProductSpecs').value = product.specs ? JSON.stringify(product.specs, null, 2) : '';
+            loadSpecsIntoForm(product.specs, 'editSpecsContainer');
             document.getElementById('editProductImage').value = product.image;
             document.getElementById('editProductOriginalPrice').value = product.originalPrice || '';
             document.getElementById('editProductBadge').value = product.badge || '';
@@ -1277,18 +1440,7 @@
                 category: document.getElementById('editProductCategory').value,
                 price: parseFloat(document.getElementById('editProductPrice').value),
                 description: document.getElementById('editProductDescription').value,
-                specs: (() => {
-                    const specsText = document.getElementById('editProductSpecs').value;
-                    if (specsText.trim()) {
-                        try {
-                            return JSON.parse(specsText);
-                        } catch (error) {
-                            showAlert('Invalid JSON format in specifications field. Please check your input.', 'warning');
-                            return currentProducts[productIndex].specs;
-                        }
-                    }
-                    return {};
-                })(),
+                specs: getSpecsFromForm('editSpecsContainer'),
                 image: document.getElementById('editProductImage').value,
                 originalPrice: document.getElementById('editProductOriginalPrice').value ? parseFloat(document.getElementById('editProductOriginalPrice').value) : null,
                 badge: document.getElementById('editProductBadge').value,
