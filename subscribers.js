@@ -4,21 +4,31 @@ let subscribersDB, subscribersRef, subscribersPush, subscribersGet;
 // Initialize EmailJS
 function initializeEmailJS() {
     try {
-        // Initialize EmailJS with your public key
-        // To use your own EmailJS account:
-        // 1. Sign up at https://www.emailjs.com/
-        // 2. Create a Service (Gmail, Outlook, etc.)
-        // 3. Create a Template with variables like: {{to_email}}, {{product_name}}, {{product_description}}, {{product_price}}
-        // 4. Replace 'mV-dJXKqQ0D6cG8H9' with your public key
-        // 5. Replace 'service_fast_tech' with your service ID
-        // 6. Replace 'template_new_product' with your template ID
+        // Wait for EmailJS to be available
+        if (typeof emailjs === 'undefined') {
+            console.log('%c⚠️ EmailJS library not loaded yet, will retry...', 'color: orange;');
+            
+            // Retry after a delay
+            setTimeout(() => {
+                if (typeof emailjs !== 'undefined') {
+                    emailjs.init({
+                        publicKey: 'tt1lZ0AV5V-8OdX76'  // Fast Tech EmailJS public key
+                    });
+                    console.log('%c✅ EmailJS initialized (after delay)', 'color: green;');
+                } else {
+                    console.log('%c⚠️ EmailJS still not available - email notifications disabled', 'color: orange;');
+                }
+            }, 1000);
+            return;
+        }
         
+        // EmailJS is available
         emailjs.init({
             publicKey: 'tt1lZ0AV5V-8OdX76'  // Fast Tech EmailJS public key
         });
         console.log('%c✅ EmailJS initialized', 'color: green;');
     } catch (error) {
-        console.log('%c⚠️ EmailJS not available - notifications will be logged only', 'color: orange;');
+        console.log('%c⚠️ EmailJS initialization error - notifications will be logged only', 'color: orange;', error);
     }
 }
 
@@ -222,6 +232,17 @@ async function notifySubscribersAboutNewProduct(productName, productDescription,
         
         // Send actual emails using EmailJS
         let emailsSent = 0;
+        
+        // Check if EmailJS is available
+        if (typeof emailjs === 'undefined') {
+            console.warn('%c⚠️ EmailJS not available - cannot send emails', 'color: orange;');
+            return {
+                success: false,
+                message: 'Email service not available',
+                subscriberCount: 0
+            };
+        }
+        
         for (const subscriber of subscribers) {
             try {
                 // Send email using EmailJS for new product notifications
@@ -290,6 +311,16 @@ async function notifySubscribersAboutPriceChange(productName, oldPrice, newPrice
         
         // Send actual emails using EmailJS
         let emailsSent = 0;
+        
+        // Check if EmailJS is available
+        if (typeof emailjs === 'undefined') {
+            console.warn('%c⚠️ EmailJS not available - cannot send emails', 'color: orange;');
+            return {
+                success: false,
+                subscriberCount: 0
+            };
+        }
+        
         for (const subscriber of subscribers) {
             try {
                 const priceStatus = newPrice < oldPrice ? 'PRICE DROP! 🎉' : 'Price Update';
