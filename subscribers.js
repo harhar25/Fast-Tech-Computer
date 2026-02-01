@@ -104,7 +104,12 @@ async function handleSubscription(event) {
     
     try {
         // Check if email already subscribed
-        const subscribersSnapshot = await subscribersGet(subscribersRef(subscribersDB, 'subscribers'));
+        if (!window.firebaseDB || !window.firebaseGet || !window.firebaseRef || !window.firebasePush) {
+            showMessage('System not ready. Please try again later.', 'danger');
+            return;
+        }
+        
+        const subscribersSnapshot = await window.firebaseGet(window.firebaseRef(window.firebaseDB, 'subscribers'));
         let subscribers = [];
         
         if (subscribersSnapshot.exists()) {
@@ -127,8 +132,8 @@ async function handleSubscription(event) {
             active: true
         };
         
-        const subscribersRefPath = subscribersRef(subscribersDB, 'subscribers');
-        await subscribersPush(subscribersRefPath, subscriberData);
+        const subscribersRefPath = window.firebaseRef(window.firebaseDB, 'subscribers');
+        await window.firebasePush(subscribersRefPath, subscriberData);
         
         console.log('%c✅ Subscriber added:', 'color: green;', email);
         
@@ -159,7 +164,13 @@ function showMessage(message, type) {
 // Get all active subscribers
 async function getActiveSubscribers() {
     try {
-        const subscribersSnapshot = await subscribersGet(subscribersRef(subscribersDB, 'subscribers'));
+        // Use Firebase initialized from admin.html
+        if (!window.firebaseDB || !window.firebaseGet || !window.firebaseRef) {
+            console.warn('%c⚠️ Firebase not available, returning empty subscribers', 'color: orange;');
+            return [];
+        }
+        
+        const subscribersSnapshot = await window.firebaseGet(window.firebaseRef(window.firebaseDB, 'subscribers'));
         
         if (!subscribersSnapshot.exists()) {
             return [];
@@ -204,8 +215,10 @@ async function notifySubscribersAboutNewProduct(productName, productDescription,
         };
         
         // Store notification in Firebase
-        const notificationsRef = subscribersRef(subscribersDB, 'notifications');
-        await subscribersPush(notificationsRef, notification);
+        if (window.firebaseRef && window.firebasePush && window.firebaseDB) {
+            const notificationsRef = window.firebaseRef(window.firebaseDB, 'notifications');
+            await window.firebasePush(notificationsRef, notification);
+        }
         
         // Send actual emails using EmailJS
         let emailsSent = 0;
@@ -270,8 +283,10 @@ async function notifySubscribersAboutPriceChange(productName, oldPrice, newPrice
         };
         
         // Store notification in Firebase
-        const notificationsRef = subscribersRef(subscribersDB, 'notifications');
-        await subscribersPush(notificationsRef, notification);
+        if (window.firebaseRef && window.firebasePush && window.firebaseDB) {
+            const notificationsRef = window.firebaseRef(window.firebaseDB, 'notifications');
+            await window.firebasePush(notificationsRef, notification);
+        }
         
         // Send actual emails using EmailJS
         let emailsSent = 0;
