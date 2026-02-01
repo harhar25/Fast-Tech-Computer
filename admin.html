@@ -728,14 +728,33 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- EmailJS with error detection -->
+    <!-- EmailJS with multiple CDN fallbacks -->
     <script>
         window.emailJSLoadStatus = 'pending';
         console.log('%c📡 Loading EmailJS from CDN...', 'color: blue;');
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/build/index.min.js"
-            onload="window.emailJSLoadStatus='loaded'; console.log('%c✅ EmailJS script loaded successfully', 'color: green;')"
-            onerror="window.emailJSLoadStatus='failed'; console.error('%c❌ CRITICAL: EmailJS CDN failed to load!', 'color: red;')"></script>
+    
+    <!-- Try unpkg first (often more reliable) -->
+    <script src="https://unpkg.com/@emailjs/browser@3/dist/build/index.min.js"
+            onload="window.emailJSLoadStatus='loaded'; console.log('%c✅ EmailJS loaded from unpkg', 'color: green;')"
+            onerror="loadEmailJSFallback()"></script>
+    
+    <script>
+        function loadEmailJSFallback() {
+            console.log('%c⚠️ unpkg failed, trying jsDelivr...', 'color: orange;');
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/build/index.min.js';
+            script.onload = () => {
+                window.emailJSLoadStatus = 'loaded';
+                console.log('%c✅ EmailJS loaded from jsDelivr', 'color: green;');
+            };
+            script.onerror = () => {
+                console.error('%c❌ All CDNs failed. Try using a local copy of EmailJS.', 'color: red; font-weight: bold;');
+                window.emailJSLoadStatus = 'failed';
+            };
+            document.head.appendChild(script);
+        }
+    </script>
     
     <!-- Firebase SDK -->
     <script type="module">
