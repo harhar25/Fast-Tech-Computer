@@ -3,7 +3,7 @@ async function sendEmailWithRetry(serviceId, templateId, templateParams, email) 
     try {
         // Check if EmailJS is available
         if (typeof emailjs === 'undefined') {
-            console.warn('%c⚠️ EmailJS not available yet, waiting...', 'color: orange;');
+            console.warn('%c⚠️ EmailJS not available yet, waiting for up to 3 seconds...', 'color: orange;');
             // Wait for emailjs to become available
             let attempts = 0;
             while (typeof emailjs === 'undefined' && attempts < 30) {
@@ -12,16 +12,24 @@ async function sendEmailWithRetry(serviceId, templateId, templateParams, email) 
             }
             
             if (typeof emailjs === 'undefined') {
-                throw new Error('EmailJS failed to load');
+                console.error('%c❌ CRITICAL: EmailJS still not available after 3 seconds!', 'color: red;');
+                console.log('%c💡 Debug info:', 'color: blue;', 
+                    'window.emailjs:', typeof window.emailjs,
+                    'emailjs:', typeof emailjs,
+                    'attempts:', attempts);
+                throw new Error('EmailJS CDN failed to load - check network');
             }
         }
         
+        console.log('%c🔄 EmailJS available, sending email to:', 'color: blue;', email);
+        console.log('%c📋 Template params:', 'color: blue;', templateParams);
+        
         // Now send the email
         const response = await emailjs.send(serviceId, templateId, templateParams);
-        console.log('%c✉️ Email sent to:', 'color: green;', email, 'Response:', response);
+        console.log('%c✅ Email sent successfully to:', 'color: green;', email, 'Response ID:', response.status);
         return true;
     } catch (error) {
-        console.warn('%c⚠️ Failed to send email to', 'color: orange;', email, error);
+        console.error('%c❌ Failed to send email to', 'color: red;', email, 'Error:', error.message);
         return false;
     }
 }
@@ -29,21 +37,26 @@ async function sendEmailWithRetry(serviceId, templateId, templateParams, email) 
 // Newsletter Subscription System
 let subscribersDB, subscribersRef, subscribersPush, subscribersGet;
 
-// Initialize EmailJS
+// Initialize EmailJS with detailed logging
 function initializeEmailJS() {
     try {
+        console.log('%c📧 EmailJS Initialization Starting...', 'color: blue; font-weight: bold;');
+        console.log('%c💡 Checking if emailjs is available:', 'color: blue;', typeof window.emailjs, typeof emailjs);
+        
         const tryInitialize = () => {
             if (typeof emailjs !== 'undefined') {
                 try {
+                    console.log('%c✅ EmailJS library detected, calling init()...', 'color: green;');
                     emailjs.init({
                         publicKey: 'tt1lZ0AV5V-8OdX76'  // Fast Tech EmailJS public key
                     });
-                    console.log('%c✅ EmailJS initialized successfully', 'color: green;');
+                    console.log('%c✅ EmailJS initialized successfully with public key: tt1lZ0AV5V-8OdX76', 'color: green; font-weight: bold;');
                 } catch (initError) {
-                    console.error('%c❌ Error calling emailjs.init:', 'color: red;', initError);
+                    console.error('%c❌ Error calling emailjs.init():', 'color: red;', initError.message);
+                    console.log('%c💡 This might be a duplicate init call - that\'s OK if emailjs is already initialized', 'color: orange;');
                 }
             } else {
-                // EmailJS not available yet, retry in 500ms
+                console.log('%c⏳ EmailJS not available yet, retrying in 500ms...', 'color: orange;');
                 setTimeout(tryInitialize, 500);
             }
         };
