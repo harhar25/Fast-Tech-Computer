@@ -41,9 +41,16 @@ let subscribersDB, subscribersRef, subscribersPush, subscribersGet;
 function initializeEmailJS() {
     try {
         console.log('%c📧 EmailJS Initialization Starting...', 'color: blue; font-weight: bold;');
+        console.log('%c💡 Script load status:', 'color: blue;', window.emailJSLoadStatus || 'unknown');
         console.log('%c💡 Checking if emailjs is available:', 'color: blue;', typeof window.emailjs, typeof emailjs);
         
         const tryInitialize = () => {
+            // Check if CDN script failed to load
+            if (window.emailJSLoadStatus === 'failed') {
+                console.error('%c❌ CRITICAL: EmailJS CDN failed to load! Check your internet connection or try a different CDN.', 'color: red; font-weight: bold;');
+                return;
+            }
+            
             if (typeof emailjs !== 'undefined') {
                 try {
                     console.log('%c✅ EmailJS library detected, calling init()...', 'color: green;');
