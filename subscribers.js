@@ -255,15 +255,7 @@ async function notifySubscribersAboutNewProduct(productName, productDescription,
         // Send actual emails using EmailJS
         let emailsSent = 0;
         
-        // Check if EmailJS is available
-        if (typeof emailjs === 'undefined') {
-            console.warn('%c⚠️ EmailJS not available - cannot send emails', 'color: orange;');
-            return {
-                success: false,
-                message: 'Email service not available',
-                subscriberCount: 0
-            };
-        }
+        console.log('%c📧 Sending emails to', 'color: blue;', subscribers.length, 'subscribers...');
         
         for (const subscriber of subscribers) {
             const success = await sendEmailWithRetry('service_fast_tech', 'template_imne3bp', {
@@ -281,7 +273,11 @@ async function notifySubscribersAboutNewProduct(productName, productDescription,
             }
         }
         
-        console.log('%c✅ Notification process completed:', 'color: green;', `${emailsSent} emails sent out of ${subscribers.length} subscribers`);
+        if (emailsSent > 0) {
+            console.log('%c✅ Notification process completed:', 'color: green;', `${emailsSent}/${subscribers.length} emails sent about: ${productName}`);
+        } else {
+            console.log('%c⚠️ No emails sent - waiting for EmailJS to load...', 'color: orange;');
+        }
         
         return {
             success: true,
@@ -331,14 +327,7 @@ async function notifySubscribersAboutPriceChange(productName, oldPrice, newPrice
         // Send actual emails using EmailJS
         let emailsSent = 0;
         
-        // Check if EmailJS is available
-        if (typeof emailjs === 'undefined') {
-            console.warn('%c⚠️ EmailJS not available - cannot send emails', 'color: orange;');
-            return {
-                success: false,
-                subscriberCount: 0
-            };
-        }
+        console.log('%c📧 Sending price change emails to', 'color: blue;', subscribers.length, 'subscribers...');
         
         for (const subscriber of subscribers) {
             const priceStatus = newPrice < oldPrice ? 'PRICE DROP! 🎉' : 'Price Update';
