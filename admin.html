@@ -575,6 +575,7 @@
                                         <option value="power-supplies">Power Supplies</option>
                                         <option value="cooling">Cooling</option>
                                         <option value="cases">Cases</option>
+                                        <option value="cctv-cameras">CCTV Cameras</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -664,6 +665,7 @@
                                     <option value="power-supplies">Power Supplies</option>
                                     <option value="cooling">Cooling</option>
                                     <option value="cases">Cases</option>
+                                    <option value="cctv-cameras">CCTV Cameras</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -734,22 +736,34 @@
         console.log('%c📡 Loading EmailJS from CDN...', 'color: blue;');
     </script>
     
-    <!-- Try unpkg first (often more reliable) -->
-    <script src="https://unpkg.com/@emailjs/browser@3/dist/build/index.min.js"
-            onload="window.emailJSLoadStatus='loaded'; console.log('%c✅ EmailJS loaded from unpkg', 'color: green;')"
-            onerror="loadEmailJSFallback()"></script>
+    <!-- Try EmailJS official CDN first -->
+    <script src="https://cdn.emailjs.com/dist/email.min.js"
+            onload="window.emailJSLoadStatus='loaded'; console.log('%c✅ EmailJS loaded from official CDN', 'color: green;')"
+            onerror="loadEmailJSFallback1()"></script>
     
     <script>
-        function loadEmailJSFallback() {
+        function loadEmailJSFallback1() {
+            console.log('%c⚠️ Official CDN failed, trying unpkg...', 'color: orange;');
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/@emailjs/browser@3/dist/email.min.js';
+            script.onload = () => {
+                window.emailJSLoadStatus = 'loaded';
+                console.log('%c✅ EmailJS loaded from unpkg', 'color: green;');
+            };
+            script.onerror = loadEmailJSFallback2;
+            document.head.appendChild(script);
+        }
+        
+        function loadEmailJSFallback2() {
             console.log('%c⚠️ unpkg failed, trying jsDelivr...', 'color: orange;');
             const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/build/index.min.js';
+            script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
             script.onload = () => {
                 window.emailJSLoadStatus = 'loaded';
                 console.log('%c✅ EmailJS loaded from jsDelivr', 'color: green;');
             };
             script.onerror = () => {
-                console.error('%c❌ All CDNs failed. Try using a local copy of EmailJS.', 'color: red; font-weight: bold;');
+                console.error('%c❌ All CDNs failed. Email notifications will not work.', 'color: red; font-weight: bold;');
                 window.emailJSLoadStatus = 'failed';
             };
             document.head.appendChild(script);
@@ -1510,7 +1524,17 @@
                 const category = document.getElementById('newProductCategory').value;
                 const price = document.getElementById('newProductPrice').value;
                 const description = document.getElementById('newProductDescription').value;
-                const image = document.getElementById('newProductImage').value; // This now contains base64 data
+                // Get image from the new multiple images system
+                const imagesJson = document.getElementById('newProductImages').value;
+                let image = '';
+                if (imagesJson) {
+                    try {
+                        const images = JSON.parse(imagesJson);
+                        image = images.length > 0 ? images[0].data : ''; // Use first image as main image
+                    } catch (e) {
+                        console.error('Error parsing images:', e);
+                    }
+                }
                 const originalPrice = document.getElementById('newProductOriginalPrice').value;
                 const badge = document.getElementById('newProductBadge').value;
                 
@@ -1525,8 +1549,7 @@
                 // Get specs from form fields
                 const specs = getSpecsFromForm('specsContainer');
                 
-                // Get multiple images
-                const imagesJson = document.getElementById('newProductImages').value;
+                // Get multiple images (already parsed above)
                 let images = [];
                 if (imagesJson) {
                     try {
@@ -1584,19 +1607,20 @@
                 // Show success alert
                 showAlert('Product added successfully to Firebase!', 'success');
                 
-                // Notify subscribers about new product (async, doesn't block the flow)
+                // Notify subscribers about new product (async, non-blocking)
                 if (typeof notifySubscribersAboutNewProduct === 'function') {
+                    // Fire and forget - don't await this to avoid blocking
                     notifySubscribersAboutNewProduct(newProduct.name, newProduct.description, newProduct.price)
                         .then(result => {
                             if (result.success) {
                                 console.log('%c📧 Subscribers notified about new product', 'color: green; font-weight: bold;', result.message);
-                                showAlert(`✅ Notification sent to ${result.subscriberCount} subscribers!`, 'info');
                             } else {
-                                console.log('%c ℹ️ No subscribers to notify yet', 'color: blue;');
+                                console.warn('⚠️ Email notification failed:', result.message);
                             }
                         })
                         .catch(error => {
-                            console.error('Error notifying subscribers:', error);
+                            console.warn('⚠️ Email notification error:', error);
+                            // Don't show error to user as product was added successfully
                         });
                 }
             } catch (error) {

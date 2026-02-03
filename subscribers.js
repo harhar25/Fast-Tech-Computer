@@ -1,3 +1,28 @@
+// Test EmailJS configuration
+async function testEmailJS() {
+    try {
+        console.log('%c🧪 Testing EmailJS configuration...', 'color: blue;');
+        
+        const testParams = {
+            to_email: 'test@example.com',
+            message: 'Test message from Fast Tech',
+            from_name: 'Fast Tech Test'
+        };
+        
+        const response = await emailjs.send('service_fast_tech', 'template_imne3bp', testParams);
+        console.log('%c✅ EmailJS test successful:', 'color: green;', response);
+        return true;
+    } catch (error) {
+        console.error('%c❌ EmailJS test failed:', 'color: red;', error);
+        console.log('%c💡 Check:', 'color: orange;', 
+            '1. Service ID: service_fast_tech', 
+            '2. Template ID: template_imne3bp',
+            '3. Public key: tt1lZ0AV5V-8OdX76',
+            '4. Template variables match');
+        return false;
+    }
+}
+
 // Helper function to send email with EmailJS
 async function sendEmailWithRetry(serviceId, templateId, templateParams, email) {
     try {
@@ -54,10 +79,18 @@ function initializeEmailJS() {
             if (typeof emailjs !== 'undefined') {
                 try {
                     console.log('%c✅ EmailJS library detected, calling init()...', 'color: green;');
-                    emailjs.init({
-                        publicKey: 'tt1lZ0AV5V-8OdX76'  // Fast Tech EmailJS public key
-                    });
-                    console.log('%c✅ EmailJS initialized successfully with public key: tt1lZ0AV5V-8OdX76', 'color: green; font-weight: bold;');
+                    // Try both old and new initialization methods
+                    if (typeof emailjs.init === 'function') {
+                        emailjs.init({
+                            publicKey: 'tt1lZ0AV5V-8OdX76'  // Fast Tech EmailJS public key
+                        });
+                        console.log('%c✅ EmailJS initialized successfully with public key: tt1lZ0AV5V-8OdX76', 'color: green; font-weight: bold;');
+                    } else if (typeof window.emailjs && typeof window.emailjs.init === 'function') {
+                        window.emailjs.init("tt1lZ0AV5V-8OdX76");
+                        console.log('%c✅ EmailJS initialized via window.emailjs', 'color: green; font-weight: bold;');
+                    } else {
+                        console.warn('%c⚠️ EmailJS loaded but init method not found', 'color: orange;');
+                    }
                 } catch (initError) {
                     console.error('%c❌ Error calling emailjs.init():', 'color: red;', initError.message);
                     console.log('%c💡 This might be a duplicate init call - that\'s OK if emailjs is already initialized', 'color: orange;');
@@ -384,4 +417,8 @@ async function notifySubscribersAboutPriceChange(productName, oldPrice, newPrice
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     initializeSubscriberSystem();
+    
+    // Add global test function for debugging
+    window.testEmailJS = testEmailJS;
+    console.log('%c🧪 EmailJS test function available: testEmailJS()', 'color: blue;');
 });

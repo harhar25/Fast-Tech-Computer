@@ -10,7 +10,8 @@ const products = {
     motherboards: [],
     'power-supplies': [],
     cooling: [],
-    cases: []
+    cases: [],
+    'cctv-cameras': []
 };
 
 // Firebase connection will be handled in the admin panel
