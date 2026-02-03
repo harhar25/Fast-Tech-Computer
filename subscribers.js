@@ -1,3 +1,28 @@
+// Test EmailJS configuration
+async function testEmailJS() {
+    try {
+        console.log('%c🧪 Testing EmailJS configuration...', 'color: blue;');
+        
+        const testParams = {
+            to_email: 'test@example.com',
+            message: 'Test message from Fast Tech',
+            from_name: 'Fast Tech Test'
+        };
+        
+        const response = await emailjs.send('service_fast_tech', 'template_imne3bp', testParams);
+        console.log('%c✅ EmailJS test successful:', 'color: green;', response);
+        return true;
+    } catch (error) {
+        console.error('%c❌ EmailJS test failed:', 'color: red;', error);
+        console.log('%c💡 Check:', 'color: orange;', 
+            '1. Service ID: service_fast_tech', 
+            '2. Template ID: template_imne3bp',
+            '3. Public key: tt1lZ0AV5V-8OdX76',
+            '4. Template variables match');
+        return false;
+    }
+}
+
 // Helper function to send email with EmailJS
 async function sendEmailWithRetry(serviceId, templateId, templateParams, email) {
     try {
@@ -392,4 +417,8 @@ async function notifySubscribersAboutPriceChange(productName, oldPrice, newPrice
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     initializeSubscriberSystem();
+    
+    // Add global test function for debugging
+    window.testEmailJS = testEmailJS;
+    console.log('%c🧪 EmailJS test function available: testEmailJS()', 'color: blue;');
 });
