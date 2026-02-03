@@ -54,10 +54,18 @@ function initializeEmailJS() {
             if (typeof emailjs !== 'undefined') {
                 try {
                     console.log('%c✅ EmailJS library detected, calling init()...', 'color: green;');
-                    emailjs.init({
-                        publicKey: 'tt1lZ0AV5V-8OdX76'  // Fast Tech EmailJS public key
-                    });
-                    console.log('%c✅ EmailJS initialized successfully with public key: tt1lZ0AV5V-8OdX76', 'color: green; font-weight: bold;');
+                    // Try both old and new initialization methods
+                    if (typeof emailjs.init === 'function') {
+                        emailjs.init({
+                            publicKey: 'tt1lZ0AV5V-8OdX76'  // Fast Tech EmailJS public key
+                        });
+                        console.log('%c✅ EmailJS initialized successfully with public key: tt1lZ0AV5V-8OdX76', 'color: green; font-weight: bold;');
+                    } else if (typeof window.emailjs && typeof window.emailjs.init === 'function') {
+                        window.emailjs.init("tt1lZ0AV5V-8OdX76");
+                        console.log('%c✅ EmailJS initialized via window.emailjs', 'color: green; font-weight: bold;');
+                    } else {
+                        console.warn('%c⚠️ EmailJS loaded but init method not found', 'color: orange;');
+                    }
                 } catch (initError) {
                     console.error('%c❌ Error calling emailjs.init():', 'color: red;', initError.message);
                     console.log('%c💡 This might be a duplicate init call - that\'s OK if emailjs is already initialized', 'color: orange;');
