@@ -1510,7 +1510,17 @@
                 const category = document.getElementById('newProductCategory').value;
                 const price = document.getElementById('newProductPrice').value;
                 const description = document.getElementById('newProductDescription').value;
-                const image = document.getElementById('newProductImage').value; // This now contains base64 data
+                // Get image from the new multiple images system
+                const imagesJson = document.getElementById('newProductImages').value;
+                let image = '';
+                if (imagesJson) {
+                    try {
+                        const images = JSON.parse(imagesJson);
+                        image = images.length > 0 ? images[0].data : ''; // Use first image as main image
+                    } catch (e) {
+                        console.error('Error parsing images:', e);
+                    }
+                }
                 const originalPrice = document.getElementById('newProductOriginalPrice').value;
                 const badge = document.getElementById('newProductBadge').value;
                 
@@ -1525,8 +1535,7 @@
                 // Get specs from form fields
                 const specs = getSpecsFromForm('specsContainer');
                 
-                // Get multiple images
-                const imagesJson = document.getElementById('newProductImages').value;
+                // Get multiple images (already parsed above)
                 let images = [];
                 if (imagesJson) {
                     try {
