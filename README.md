@@ -7,7 +7,6 @@ A modern, responsive e-commerce website for computer parts and components built 
 ### 🛍️ **Shopping Experience**
 - **Product Catalog**: Browse 8 categories of computer components
 - **Product Details**: Detailed product pages with specifications and reviews
-- **Shopping Cart**: Add to cart functionality with quantity management
 - **Search**: Real-time product search with autocomplete
 - **Filters**: Advanced filtering by category, brand, and price range
 - **Sorting**: Sort products by price, rating, and name
@@ -29,9 +28,7 @@ A modern, responsive e-commerce website for computer parts and components built 
 - **Cases**: PC cases in different form factors
 
 ### 🛒 **E-commerce Features**
-- **Product Badges**: New, Hot, Sale indicators
 - **Customer Reviews**: Star ratings and review summaries
-- **Wishlist**: Save products for later
 - **Deals Section**: Special offers and discounts
 - **Newsletter**: Email subscription for updates
 
@@ -84,28 +81,6 @@ computer-parts-store/
 - See full specifications, reviews, and related products
 - Add to cart from the detail page
 
-## Customization
-
-### Adding Products
-Edit `products.js` to add new products:
-
-```javascript
-{
-    id: 'unique-product-id',
-    name: 'Product Name',
-    description: 'Product description',
-    price: 999.99,
-    category: 'category-slug',
-    brand: 'Brand Name',
-    specs: {
-        // Product specifications
-    },
-    rating: 4.5,
-    reviews: 100,
-    inStock: true,
-    badge: 'new' // optional: new, hot, sale
-}
-```
 
 ### Styling
 - Modify `styles.css` for visual changes
@@ -132,11 +107,6 @@ Add new categories in:
 - **Price Range**: Min/max price inputs
 - **Sort Options**: Featured, price (low/high), rating, name
 
-### Cart System
-- **LocalStorage**: Cart persists across browser sessions
-- **Quantity Management**: Increment/decrement quantities
-- **Real-time Updates**: Cart count updates instantly
-- **Modal Interface**: Clean cart modal with item details
 
 ### Responsive Design
 - **Mobile**: Optimized for phones and tablets
@@ -150,6 +120,7 @@ Add new categories in:
 - **Firefox**: Full support
 - **Safari**: Full support
 - **Edge**: Full support
+- **Brave**: Full support
 - **Mobile Browsers**: iOS Safari, Chrome Mobile
 
 ## Performance
@@ -175,7 +146,6 @@ Add new categories in:
 ## Support
 
 This is a frontend demonstration project. For production use, consider:
-- Adding a backend database
 - Implementing secure payment processing
 - Adding user authentication
 - Setting up proper hosting and CDN
