@@ -65,7 +65,44 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Add scroll animations
     initializeScrollAnimations();
+    
+    // Make Products nav act as direct link on small screens
+    initializeNavBehavior();
 });
+
+// Make the Products dropdown behave as a direct link on small screens (mobile)
+function initializeNavBehavior() {
+    try {
+        const productsToggle = document.querySelector('.nav-link.dropdown-toggle');
+        if (!productsToggle) return;
+
+        // Use a data-href attribute to point to the products page
+        productsToggle.setAttribute('data-href', 'products.html');
+
+        productsToggle.addEventListener('click', function (e) {
+            const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+
+            // If the navbar is collapsed / small screen, navigate instead of toggling
+            // Bootstrap's lg breakpoint is 992px; treat anything below as mobile/tablet
+            if (viewportWidth < 992) {
+                // Prevent Bootstrap dropdown toggle from interfering
+                e.preventDefault();
+                // Close the navbar collapse if open (improves UX)
+                const navbarCollapse = document.getElementById('navbarNav');
+                if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse);
+                    bsCollapse.hide();
+                }
+                // Navigate to products page
+                const href = productsToggle.getAttribute('data-href') || 'products.html';
+                window.location.href = href;
+            }
+            // On larger screens do nothing special (allow dropdown)
+        });
+    } catch (err) {
+        console.error('Error initializing nav behavior', err);
+    }
+}
 
 // Show loading state while Firebase loads
 function showLoadingState() {
@@ -316,7 +353,9 @@ function createProductCard(product) {
     return `
         <div class="product-card" data-product-id="${product.id}">
             <div class="product-image">
-                <img src="${product.image}" alt="${product.name}">
+                <a href="product.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+                    <img src="${product.image}" alt="${product.name}" style="cursor: pointer;">
+                </a>
                 ${badgeHtml}
                 <div class="product-quick-actions">
                     <button class="quick-action-btn" onclick="handleOrderClick('${product.name}')" title="Make an Order for this Item">
