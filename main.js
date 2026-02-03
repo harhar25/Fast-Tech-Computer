@@ -594,7 +594,6 @@ function addHoverEffects() {
 // Initialize all animations
 document.addEventListener('DOMContentLoaded', function() {
     initializeScrollAnimations();
-    createParticleEffect();
     initializeSmoothScrolling();
     addHoverEffects();
 });

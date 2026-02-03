@@ -213,12 +213,24 @@ body {
 
 /* Enterprise Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d3748 50%, #404040 100%);
+  background: #000;
   position: relative;
   overflow: hidden;
-  min-height: 100vh;
+  min-height: 40vh;
   display: flex;
   align-items: center;
+}
+
+.hero-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  z-index: 0;
+  opacity: 0.4;
+  display: block;
 }
 
 .hero-section::before {
@@ -233,6 +245,8 @@ body {
     radial-gradient(circle at 70% 60%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
     radial-gradient(circle at 50% 80%, rgba(245, 158, 11, 0.06) 0%, transparent 50%);
   animation: heroGradient 20s ease-in-out infinite;
+  z-index: 1;
+  display: none;
 }
 
 @keyframes heroGradient {
@@ -362,6 +376,10 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
+.hero-visual {
+  display: none;
+}
+
 .hero-visual i {
   font-size: clamp(8rem, 15vw, 12rem);
   color: rgba(255, 255, 255, 0.15);
@@ -376,6 +394,11 @@ body {
   50% { 
     transform: translateY(-20px) rotate(5deg); 
   }
+}
+
+.hero-section > .container {
+  position: relative;
+  z-index: 2;
 }
 
 /* World-Class Animations */
@@ -796,25 +819,6 @@ body {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-/* Particle Animation */
-.particle {
-  position: absolute;
-  pointer-events: none;
-  opacity: 0;
-  animation: particleFloat 8s ease-in-out infinite;
-}
-
-@keyframes particleFloat {
-  0%, 100% {
-    opacity: 0;
-    transform: translateY(100px) scale(0);
-  }
-  10%, 90% {
-    opacity: 0.6;
-    transform: translateY(-100px) scale(1);
-  }
 }
 
 /* Enterprise Product Cards */
