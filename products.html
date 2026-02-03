@@ -145,6 +145,63 @@
                                 <!-- Brand filters will be populated by JavaScript -->
                             </div>
                         </div>
+                            <!-- Brands - Expandable -->
+                            <div class="filter-section">
+                                <h6 style="cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between;" onclick="toggleBrandFilters(this)">
+                                    <span>Brands</span>
+                                    <i class="bi bi-chevron-down" style="font-size: 0.9rem; transition: transform 0.3s ease;"></i>
+                                </h6>
+                                <div id="brandFiltersExpand" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease;">
+                                    <div class="filter-option">
+                                        <label>
+                                            <input type="checkbox" value="Intel" onchange="applyFilters()">
+                                            Intel
+                                        </label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <label>
+                                            <input type="checkbox" value="AMD" onchange="applyFilters()">
+                                            AMD
+                                        </label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <label>
+                                            <input type="checkbox" value="NVIDIA" onchange="applyFilters()">
+                                            NVIDIA
+                                        </label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <label>
+                                            <input type="checkbox" value="Corsair" onchange="applyFilters()">
+                                            Corsair
+                                        </label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <label>
+                                            <input type="checkbox" value="Kingston" onchange="applyFilters()">
+                                            Kingston
+                                        </label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <label>
+                                            <input type="checkbox" value="Samsung" onchange="applyFilters()">
+                                            Samsung
+                                        </label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <label>
+                                            <input type="checkbox" value="MSI" onchange="applyFilters()">
+                                            MSI
+                                        </label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <label>
+                                            <input type="checkbox" value="ASUS" onchange="applyFilters()">
+                                            ASUS
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         
                         <!-- Price Range -->
                         <div class="filter-section">
@@ -255,5 +312,6 @@
     <script src="cart.js"></script>
     <script src="order.js"></script>
     <script src="products-page.js"></script>
+        <script src="toggle-brand-filters.js"></script>
 </body>
 </html>
