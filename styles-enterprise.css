@@ -1131,8 +1131,18 @@ body {
   transition: transform var(--transition-normal);
 }
 
+.category-card.is-active::before {
+  transform: scaleX(1);
+}
+
 .category-card:hover::before {
   transform: scaleX(1);
+}
+
+.category-card.is-active {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--accent);
 }
 
 .category-card:hover {
@@ -1156,6 +1166,12 @@ body {
 }
 
 .category-card:hover .category-icon {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: white;
+  transform: scale(1.1) rotate(5deg);
+}
+
+.category-card.is-active .category-icon {
   background: linear-gradient(135deg, var(--accent), var(--accent-dark));
   color: white;
   transform: scale(1.1) rotate(5deg);
@@ -1185,6 +1201,11 @@ body {
 }
 
 .category-card:hover .category-btn {
+  background: var(--accent);
+  color: white;
+}
+
+.category-card.is-active .category-btn {
   background: var(--accent);
   color: white;
 }

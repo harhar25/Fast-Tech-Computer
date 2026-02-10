@@ -568,6 +568,8 @@ function initializeSmoothScrolling() {
 
 // Add hover effects with animation
 function addHoverEffects() {
+    const canHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
     // Enhanced button hover effects
     document.querySelectorAll('.btn-hero').forEach(button => {
         button.addEventListener('mouseenter', function() {
@@ -580,15 +582,17 @@ function addHoverEffects() {
     });
 
     // Enhanced card hover effects
-    document.querySelectorAll('.category-card, .product-card').forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-10px) scale(1.02)';
+    if (canHover) {
+        document.querySelectorAll('.category-card, .product-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
         });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    });
+    }
 }
 
 // Initialize all animations
@@ -699,15 +703,104 @@ function showNotification(message, type = 'info') {
 
 // Category card hover effects
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.category-card').forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-10px) scale(1.02)';
+    const cards = Array.from(document.querySelectorAll('.category-card'));
+    if (cards.length === 0) return;
+
+    const canHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const isMobileTouch = window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+    if (canHover) {
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.classList.add('is-active');
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.classList.remove('is-active');
+            });
         });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    });
+    }
+
+    if (isMobileTouch) {
+        let activeCard = null;
+
+        const setActive = (next) => {
+            if (activeCard === next) return;
+            if (activeCard) activeCard.classList.remove('is-active');
+            activeCard = next;
+            if (activeCard) activeCard.classList.add('is-active');
+        };
+
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    const intersecting = entries
+                        .filter(e => e.isIntersecting)
+                        .map(e => e.target);
+
+                    if (intersecting.length === 0) return;
+
+                    const centerY = window.innerHeight / 2;
+                    let best = null;
+                    let bestDist = Infinity;
+
+                    intersecting.forEach(el => {
+                        const rect = el.getBoundingClientRect();
+                        const elCenter = rect.top + rect.height / 2;
+                        const dist = Math.abs(elCenter - centerY);
+                        if (dist < bestDist) {
+                            bestDist = dist;
+                            best = el;
+                        }
+                    });
+
+                    setActive(best);
+                },
+                {
+                    root: null,
+                    threshold: [0.15, 0.3, 0.5, 0.75],
+                    rootMargin: '-40% 0px -40% 0px'
+                }
+            );
+
+            cards.forEach(c => observer.observe(c));
+
+            const updateOnResize = () => {
+                if (!activeCard) return;
+                const centerY = window.innerHeight / 2;
+                const rect = activeCard.getBoundingClientRect();
+                const elCenter = rect.top + rect.height / 2;
+                if (Math.abs(elCenter - centerY) > window.innerHeight * 0.25) {
+                    setActive(null);
+                }
+            };
+
+            window.addEventListener('resize', updateOnResize);
+        } else {
+            const updateActiveFromScroll = () => {
+                const centerY = window.innerHeight / 2;
+                let best = null;
+                let bestDist = Infinity;
+
+                cards.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const elCenter = rect.top + rect.height / 2;
+                    const dist = Math.abs(elCenter - centerY);
+
+                    if (rect.bottom >= 0 && rect.top <= window.innerHeight && dist < bestDist) {
+                        bestDist = dist;
+                        best = el;
+                    }
+                });
+
+                setActive(best);
+            };
+
+            const onScroll = debounce(updateActiveFromScroll, 50);
+            window.addEventListener('scroll', onScroll, { passive: true });
+            updateActiveFromScroll();
+        }
+    }
 });
 
 // Add search results container to search input
