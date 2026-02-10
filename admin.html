@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Fast Tech</title>
+    <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
         body {
             margin: 0;
@@ -96,6 +98,11 @@
         .btn-login:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .recaptcha-wrap {
+            display: flex;
+            justify-content: center;
         }
         
         /* Dashboard Styles */
@@ -384,14 +391,55 @@
                             Remember me
                         </label>
                     </div>
+                    <div class="mb-3 recaptcha-wrap">
+                        <div class="g-recaptcha" data-sitekey="REPLACE_WITH_YOUR_RECAPTCHA_SITE_KEY"></div>
+                    </div>
                     <button type="submit" class="btn btn-primary btn-login w-100">
                         <i class="bi bi-box-arrow-in-right"></i> Login
                     </button>
                 </form>
+                <div id="firebaseRecaptchaContainer" style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;"></div>
                 <div class="text-center mt-3">
                     <a href="index.html" class="text-decoration-none">
                         <i class="bi bi-arrow-left"></i> Back to Store
                     </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MFA Code Modal -->
+    <div class="modal fade" id="mfaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Two-Step Verification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="mfaAlert" class="alert alert-danger d-none" role="alert"></div>
+                    <div id="mfaEnrollBlock">
+                        <p class="text-muted mb-3">Set up SMS verification for your admin account.</p>
+                        <div class="mb-3">
+                            <label for="mfaPhone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="mfaPhone" placeholder="+63XXXXXXXXXX">
+                            <div class="form-text">Include country code (example: +63...)</div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary w-100" id="mfaSendCodeBtn">
+                            Send Code
+                        </button>
+                        <hr>
+                    </div>
+
+                    <p class="text-muted mb-3" id="mfaCodeHelp">Enter the 6-digit code sent to your phone.</p>
+                    <div class="mb-3">
+                        <label for="mfaCode" class="form-label">Verification Code</label>
+                        <input type="text" class="form-control" id="mfaCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="mfaVerifyBtn">Verify</button>
                 </div>
             </div>
         </div>
@@ -777,6 +825,17 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
         import { getDatabase, ref, set, get, push, remove, update } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        import {
+            getAuth,
+            signInWithEmailAndPassword,
+            onAuthStateChanged,
+            signOut,
+            getMultiFactorResolver,
+            multiFactor,
+            PhoneAuthProvider,
+            PhoneMultiFactorGenerator,
+            RecaptchaVerifier
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -794,6 +853,7 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
+        const auth = getAuth(app);
         
         // Make Firebase available globally
         window.firebaseDB = database;
@@ -803,17 +863,36 @@
         window.firebasePush = push;
         window.firebaseRemove = remove;
         window.firebaseUpdate = update;
+
+        // Make Auth available globally
+        window.firebaseAuth = auth;
+        window.firebaseSignInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.firebaseOnAuthStateChanged = onAuthStateChanged;
+        window.firebaseSignOut = signOut;
+
+        // MFA helpers
+        window.firebaseGetMfaResolver = getMultiFactorResolver;
+        window.firebaseMultiFactor = multiFactor;
+        window.firebasePhoneAuthProvider = PhoneAuthProvider;
+        window.firebasePhoneMfaGenerator = PhoneMultiFactorGenerator;
+        window.firebaseRecaptchaVerifier = RecaptchaVerifier;
     </script>
     
     <script src="currency.js?v=2"></script>
     <script src="products.js"></script>
     <script src="subscribers.js"></script>
     <script>
-        // Admin credentials
-        const ADMIN_CREDENTIALS = {
-            username: 'admin',
-            password: 'admin123'
-        };
+        // Allowed admin emails (must match the Firebase Auth user you create)
+        // Add your real admin emails here.
+        const ADMIN_EMAIL_ALLOWLIST = [
+            'admin@example.com'
+        ];
+
+        let mfaModal;
+        let mfaResolver = null;
+        let mfaVerificationId = null;
+        let firebaseRecaptchaVerifier = null;
+        let mfaMode = 'challenge';
 
         let currentProducts = [];
         let editModal;
@@ -831,6 +910,11 @@
                         
                         console.log('%c✓ Initializing event listeners...', 'color: blue;');
                         initializeEventListeners();
+
+                        const modalEl = document.getElementById('mfaModal');
+                        if (modalEl) {
+                            mfaModal = new bootstrap.Modal(modalEl);
+                        }
                         
                         console.log('%c✓ Initializing edit modal...', 'color: blue;');
                         const editProductModal = document.getElementById('editProductModal');
@@ -862,16 +946,34 @@
 
         // Check authentication
         function checkAuth() {
-            const isLoggedIn = sessionStorage.getItem('adminLoggedIn') === 'true' || 
-                              localStorage.getItem('adminLoggedIn') === 'true';
-            
-            if (isLoggedIn) {
-                showDashboard();
+            if (!window.firebaseAuth || !window.firebaseOnAuthStateChanged) {
+                showLogin();
+                return;
+            }
+
+            window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
+                if (!user) {
+                    showLogin();
+                    return;
+                }
+
+                const email = (user.email || '').toLowerCase();
+                const allowed = ADMIN_EMAIL_ALLOWLIST.map(e => e.toLowerCase()).includes(email);
+
+                if (!allowed) {
+                    const alertDiv = document.getElementById('loginAlert');
+                    if (alertDiv) {
+                        alertDiv.textContent = 'This account is not authorized to access the admin panel.';
+                        alertDiv.classList.remove('d-none');
+                    }
+                    logout();
+                    return;
+                }
+
+                showDashboard(email);
                 loadProducts();
                 updateDashboardStats();
-            } else {
-                showLogin();
-            }
+            });
         }
 
         // Show login section
@@ -880,12 +982,12 @@
         }
 
         // Show dashboard section
-        function showDashboard() {
+        function showDashboard(email) {
             document.body.classList.add('dashboard-active');
             
             // Display admin username
-            const username = sessionStorage.getItem('adminUsername') || localStorage.getItem('adminUsername') || 'Admin';
-            document.getElementById('adminUser').textContent = `Welcome, ${username}`;
+            const displayName = email || (window.firebaseAuth && window.firebaseAuth.currentUser && window.firebaseAuth.currentUser.email) || 'Admin';
+            document.getElementById('adminUser').textContent = `Welcome, ${displayName}`;
         }
 
         // Initialize event listeners
@@ -894,37 +996,86 @@
                 // Login form
                 const loginForm = document.getElementById('loginForm');
                 if (loginForm) {
-                    loginForm.addEventListener('submit', function(e) {
+                    loginForm.addEventListener('submit', async function(e) {
                         e.preventDefault();
                         
-                        const username = document.getElementById('username').value;
+                        const email = document.getElementById('username').value;
                         const password = document.getElementById('password').value;
                         const alertDiv = document.getElementById('loginAlert');
-                        
-                        if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-                            // Store login session
-                            sessionStorage.setItem('adminLoggedIn', 'true');
-                            sessionStorage.setItem('adminUsername', username);
-                            
-                            // Remember me functionality
-                            if (document.getElementById('rememberMe').checked) {
-                                localStorage.setItem('adminLoggedIn', 'true');
-                                localStorage.setItem('adminUsername', username);
-                            }
-                            
-                            // Show dashboard
-                            showDashboard();
-                            loadProducts();
-                            updateDashboardStats();
-                        } else {
-                            alertDiv.textContent = 'Invalid username or password';
+
+                        const captchaResponse = (window.grecaptcha && typeof window.grecaptcha.getResponse === 'function')
+                            ? window.grecaptcha.getResponse()
+                            : '';
+
+                        if (!captchaResponse) {
+                            alertDiv.textContent = 'Please complete the reCAPTCHA verification.';
                             alertDiv.classList.remove('d-none');
-                            
-                            // Hide alert after 3 seconds
                             setTimeout(() => {
                                 alertDiv.classList.add('d-none');
                             }, 3000);
+                            return;
                         }
+                        
+                        if (!window.firebaseAuth || !window.firebaseSignInWithEmailAndPassword) {
+                            alertDiv.textContent = 'Auth system not ready. Please refresh and try again.';
+                            alertDiv.classList.remove('d-none');
+                            return;
+                        }
+
+                        try {
+                            const cred = await window.firebaseSignInWithEmailAndPassword(window.firebaseAuth, email, password);
+                            const userEmail = ((cred.user && cred.user.email) || '').toLowerCase();
+                            const allowed = ADMIN_EMAIL_ALLOWLIST.map(e => e.toLowerCase()).includes(userEmail);
+                            if (!allowed) {
+                                alertDiv.textContent = 'This account is not authorized to access the admin panel.';
+                                alertDiv.classList.remove('d-none');
+                                logout();
+                                return;
+                            }
+
+                            await enforceMfaEnrollment();
+
+                            showDashboard(userEmail);
+                            loadProducts();
+                            updateDashboardStats();
+                        } catch (err) {
+                            // Firebase MFA required
+                            if (err && err.code === 'auth/multi-factor-auth-required') {
+                                await startMfaChallenge(err);
+                                return;
+                            }
+
+                            if (err && err.message === 'MFA enrollment required') {
+                                return;
+                            }
+
+                            alertDiv.textContent = 'Invalid email or password';
+                            alertDiv.classList.remove('d-none');
+
+                            if (window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
+                                window.grecaptcha.reset();
+                            }
+
+                            setTimeout(() => {
+                                alertDiv.classList.add('d-none');
+                            }, 3000);
+
+                            console.error('Admin login failed:', err);
+                        }
+                    });
+                }
+
+                const verifyBtn = document.getElementById('mfaVerifyBtn');
+                if (verifyBtn) {
+                    verifyBtn.addEventListener('click', async function() {
+                        await verifyMfaCode();
+                    });
+                }
+
+                const sendCodeBtn = document.getElementById('mfaSendCodeBtn');
+                if (sendCodeBtn) {
+                    sendCodeBtn.addEventListener('click', async function() {
+                        await sendEnrollmentCode();
                     });
                 }
 
@@ -970,6 +1121,197 @@
                 console.log('%c✅ Event listeners initialized', 'color: green;');
             } catch (error) {
                 console.error('%c❌ Error initializing event listeners:', 'color: red;', error);
+            }
+        }
+
+        async function enforceMfaEnrollment() {
+            if (!window.firebaseAuth || !window.firebaseMultiFactor) return;
+
+            const user = window.firebaseAuth.currentUser;
+            if (!user) return;
+
+            const mfa = window.firebaseMultiFactor(user);
+            if (mfa.enrolledFactors && mfa.enrolledFactors.length > 0) return;
+
+            // Prompt enrollment flow
+            await startMfaEnrollment();
+            throw new Error('MFA enrollment required');
+        }
+
+        function ensureFirebaseRecaptchaVerifier() {
+            if (firebaseRecaptchaVerifier) return firebaseRecaptchaVerifier;
+            if (!window.firebaseRecaptchaVerifier || !window.firebaseAuth) return null;
+
+            const container = document.getElementById('firebaseRecaptchaContainer');
+            if (!container) return null;
+
+            firebaseRecaptchaVerifier = new window.firebaseRecaptchaVerifier(window.firebaseAuth, container, {
+                size: 'invisible'
+            });
+            return firebaseRecaptchaVerifier;
+        }
+
+        async function startMfaChallenge(err) {
+            if (!window.firebaseGetMfaResolver || !window.firebasePhoneAuthProvider || !window.firebasePhoneMfaGenerator) return;
+
+            const resolver = window.firebaseGetMfaResolver(window.firebaseAuth, err);
+            if (!resolver || !resolver.hints || resolver.hints.length === 0) {
+                const alertDiv = document.getElementById('loginAlert');
+                if (alertDiv) {
+                    alertDiv.textContent = 'Two-step verification required, but no MFA hints found. Please contact admin.';
+                    alertDiv.classList.remove('d-none');
+                }
+                return;
+            }
+
+            mfaResolver = resolver;
+            mfaMode = 'challenge';
+
+            const phoneInfoOptions = {
+                multiFactorHint: resolver.hints[0],
+                session: resolver.session
+            };
+
+            const recaptcha = ensureFirebaseRecaptchaVerifier();
+            if (!recaptcha) {
+                const alertDiv = document.getElementById('loginAlert');
+                if (alertDiv) {
+                    alertDiv.textContent = 'Verification system not ready. Please refresh and try again.';
+                    alertDiv.classList.remove('d-none');
+                }
+                return;
+            }
+
+            const provider = new window.firebasePhoneAuthProvider(window.firebaseAuth);
+            mfaVerificationId = await provider.verifyPhoneNumber(phoneInfoOptions, recaptcha);
+
+            const mfaAlert = document.getElementById('mfaAlert');
+            if (mfaAlert) mfaAlert.classList.add('d-none');
+            const codeInput = document.getElementById('mfaCode');
+            if (codeInput) codeInput.value = '';
+
+            const enrollBlock = document.getElementById('mfaEnrollBlock');
+            if (enrollBlock) enrollBlock.style.display = 'none';
+            const codeHelp = document.getElementById('mfaCodeHelp');
+            if (codeHelp) codeHelp.textContent = 'Enter the 6-digit code sent to your phone.';
+
+            if (mfaModal) {
+                mfaModal.show();
+            }
+        }
+
+        async function startMfaEnrollment() {
+            if (!window.firebaseAuth || !window.firebaseMultiFactor || !window.firebasePhoneAuthProvider || !window.firebasePhoneMfaGenerator) return;
+
+            mfaResolver = null;
+            mfaVerificationId = null;
+            mfaMode = 'enroll';
+
+            const enrollBlock = document.getElementById('mfaEnrollBlock');
+            if (enrollBlock) enrollBlock.style.display = '';
+            const codeHelp = document.getElementById('mfaCodeHelp');
+            if (codeHelp) codeHelp.textContent = 'After sending a code, enter it below to finish setup.';
+
+            const mfaAlert = document.getElementById('mfaAlert');
+            if (mfaAlert) mfaAlert.classList.add('d-none');
+            const codeInput = document.getElementById('mfaCode');
+            if (codeInput) codeInput.value = '';
+
+            if (mfaModal) {
+                mfaModal.show();
+            }
+        }
+
+        async function sendEnrollmentCode() {
+            if (!window.firebaseAuth || !window.firebaseMultiFactor || !window.firebasePhoneAuthProvider) return;
+
+            const phoneInput = document.getElementById('mfaPhone');
+            const phoneNumber = phoneInput ? phoneInput.value.trim() : '';
+            const mfaAlert = document.getElementById('mfaAlert');
+
+            if (!phoneNumber) {
+                if (mfaAlert) {
+                    mfaAlert.textContent = 'Please enter your phone number.';
+                    mfaAlert.classList.remove('d-none');
+                }
+                return;
+            }
+
+            try {
+                const user = window.firebaseAuth.currentUser;
+                const session = await window.firebaseMultiFactor(user).getSession();
+                const recaptcha = ensureFirebaseRecaptchaVerifier();
+                const provider = new window.firebasePhoneAuthProvider(window.firebaseAuth);
+                mfaVerificationId = await provider.verifyPhoneNumber({ phoneNumber, session }, recaptcha);
+
+                if (mfaAlert) {
+                    mfaAlert.textContent = 'Code sent. Please enter it below.';
+                    mfaAlert.classList.remove('d-none');
+                    mfaAlert.classList.remove('alert-danger');
+                    mfaAlert.classList.add('alert-success');
+                }
+            } catch (e) {
+                if (mfaAlert) {
+                    mfaAlert.textContent = 'Failed to send code. Please try again.';
+                    mfaAlert.classList.remove('d-none');
+                    mfaAlert.classList.remove('alert-success');
+                    mfaAlert.classList.add('alert-danger');
+                }
+                console.error('MFA enrollment send failed:', e);
+            }
+        }
+
+        async function verifyMfaCode() {
+            if (!mfaVerificationId || !window.firebasePhoneMfaGenerator) return;
+            if (mfaMode !== 'enroll' && !mfaResolver) return;
+
+            const codeInput = document.getElementById('mfaCode');
+            const code = codeInput ? codeInput.value.trim() : '';
+            const mfaAlert = document.getElementById('mfaAlert');
+
+            if (!code) {
+                if (mfaAlert) {
+                    mfaAlert.textContent = 'Please enter the verification code.';
+                    mfaAlert.classList.remove('d-none');
+                }
+                return;
+            }
+
+            try {
+                const cred = window.firebasePhoneAuthProvider.credential(mfaVerificationId, code);
+                const assertion = window.firebasePhoneMfaGenerator.assertion(cred);
+
+                if (mfaMode === 'enroll') {
+                    const user = window.firebaseAuth.currentUser;
+                    await window.firebaseMultiFactor(user).enroll(assertion, 'sms');
+
+                    if (mfaModal) {
+                        mfaModal.hide();
+                    }
+
+                    const userEmail = (user && user.email ? user.email : '').toLowerCase();
+                    showDashboard(userEmail);
+                    loadProducts();
+                    updateDashboardStats();
+                    return;
+                }
+
+                const result = await mfaResolver.resolveSignIn(assertion);
+
+                if (mfaModal) {
+                    mfaModal.hide();
+                }
+
+                const userEmail = ((result.user && result.user.email) || '').toLowerCase();
+                showDashboard(userEmail);
+                loadProducts();
+                updateDashboardStats();
+            } catch (e) {
+                if (mfaAlert) {
+                    mfaAlert.textContent = 'Invalid verification code. Please try again.';
+                    mfaAlert.classList.remove('d-none');
+                }
+                console.error('MFA verify failed:', e);
             }
         }
 
@@ -1921,10 +2263,9 @@
 
         // Logout
         function logout() {
-            sessionStorage.removeItem('adminLoggedIn');
-            sessionStorage.removeItem('adminUsername');
-            localStorage.removeItem('adminLoggedIn');
-            localStorage.removeItem('adminUsername');
+            if (window.firebaseAuth && window.firebaseSignOut) {
+                window.firebaseSignOut(window.firebaseAuth).catch((e) => console.error('Sign out failed:', e));
+            }
             
             // Clear login form fields
             document.getElementById('username').value = '';
