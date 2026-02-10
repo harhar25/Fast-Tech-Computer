@@ -894,6 +894,7 @@
         let firebaseRecaptchaVerifier = null;
         let mfaMode = 'challenge';
         let mfaPending = false;
+        let loginJustHappened = false;
 
         let currentProducts = [];
         let editModal;
@@ -994,17 +995,37 @@
                     return;
                 }
 
+                // If MFA isn't enrolled, only prompt enrollment right after an explicit login.
+                // Otherwise, sign out to avoid trapping the UI in the MFA modal on page refresh.
                 try {
-                    await enforceMfaEnrollment();
+                    const mfa = window.firebaseMultiFactor ? window.firebaseMultiFactor(user) : null;
+                    const hasMfa = !!(mfa && mfa.enrolledFactors && mfa.enrolledFactors.length > 0);
+                    if (!hasMfa) {
+                        if (loginJustHappened) {
+                            try {
+                                await enforceMfaEnrollment();
+                            } catch (e) {
+                                showLogin();
+                                return;
+                            }
+                        } else {
+                            const alertDiv = document.getElementById('loginAlert');
+                            if (alertDiv) {
+                                alertDiv.textContent = 'Two-step verification setup is required. Please log in again to complete setup.';
+                                alertDiv.classList.remove('d-none');
+                            }
+                            logout();
+                            return;
+                        }
+                    }
                 } catch (e) {
-                    // Enrollment prompt shown; do not show dashboard until completed.
-                    showLogin();
-                    return;
+                    console.warn('MFA state check warning:', e);
                 }
 
                 showDashboard(email);
                 loadProducts();
                 updateDashboardStats();
+                loginJustHappened = false;
             });
         }
 
@@ -1099,6 +1120,7 @@
                         }
 
                         try {
+                            loginJustHappened = true;
                             const cred = await window.firebaseSignInWithEmailAndPassword(window.firebaseAuth, email, password);
                             const userEmail = ((cred.user && cred.user.email) || '').toLowerCase();
                             const allowed = ADMIN_EMAIL_ALLOWLIST.map(e => e.toLowerCase()).includes(userEmail);
@@ -1114,6 +1136,7 @@
                             showDashboard(userEmail);
                             loadProducts();
                             updateDashboardStats();
+                            loginJustHappened = false;
                         } catch (err) {
                             // Firebase MFA required
                             if (err && err.code === 'auth/multi-factor-auth-required') {
@@ -2402,6 +2425,7 @@
             }
 
             mfaPending = false;
+            loginJustHappened = false;
             
             // Clear login form fields
             document.getElementById('username').value = '';
