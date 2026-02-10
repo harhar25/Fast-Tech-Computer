@@ -893,6 +893,7 @@
         let mfaVerificationId = null;
         let firebaseRecaptchaVerifier = null;
         let mfaMode = 'challenge';
+        let mfaPending = false;
 
         let currentProducts = [];
         let editModal;
@@ -914,6 +915,18 @@
                         const modalEl = document.getElementById('mfaModal');
                         if (modalEl) {
                             mfaModal = new bootstrap.Modal(modalEl);
+
+                            modalEl.addEventListener('hidden.bs.modal', function() {
+                                if (mfaPending) {
+                                    showLogin();
+                                    const alertDiv = document.getElementById('loginAlert');
+                                    if (alertDiv) {
+                                        alertDiv.textContent = 'Two-step verification is required. Please complete verification to access the admin panel.';
+                                        alertDiv.classList.remove('d-none');
+                                    }
+                                    logout();
+                                }
+                            });
                         }
                         
                         console.log('%c✓ Initializing edit modal...', 'color: blue;');
@@ -951,7 +964,7 @@
                 return;
             }
 
-            window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
+            window.firebaseOnAuthStateChanged(window.firebaseAuth, async (user) => {
                 if (!user) {
                     showLogin();
                     return;
@@ -967,6 +980,14 @@
                         alertDiv.classList.remove('d-none');
                     }
                     logout();
+                    return;
+                }
+
+                try {
+                    await enforceMfaEnrollment();
+                } catch (e) {
+                    // Enrollment prompt shown; do not show dashboard until completed.
+                    showLogin();
                     return;
                 }
 
@@ -1135,6 +1156,7 @@
 
             // Prompt enrollment flow
             await startMfaEnrollment();
+            showLogin();
             throw new Error('MFA enrollment required');
         }
 
@@ -1173,6 +1195,7 @@
 
             mfaResolver = resolver;
             mfaMode = 'challenge';
+            mfaPending = true;
 
             const phoneInfoOptions = {
                 multiFactorHint: resolver.hints[0],
@@ -1213,6 +1236,7 @@
             mfaResolver = null;
             mfaVerificationId = null;
             mfaMode = 'enroll';
+            mfaPending = true;
 
             const enrollBlock = document.getElementById('mfaEnrollBlock');
             if (enrollBlock) enrollBlock.style.display = '';
@@ -1303,6 +1327,8 @@
                     const user = window.firebaseAuth.currentUser;
                     await window.firebaseMultiFactor(user).enroll(assertion, 'sms');
 
+                    mfaPending = false;
+
                     if (mfaModal) {
                         mfaModal.hide();
                     }
@@ -1315,6 +1341,8 @@
                 }
 
                 const result = await mfaResolver.resolveSignIn(assertion);
+
+                mfaPending = false;
 
                 if (mfaModal) {
                     mfaModal.hide();
