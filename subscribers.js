@@ -62,6 +62,14 @@ async function sendEmailWithRetry(serviceId, templateId, templateParams, email) 
 // Newsletter Subscription System
 let subscribersDB, subscribersRef, subscribersPush, subscribersGet;
 
+function getFirebaseSubscriberApi() {
+    const db = window.firebaseDB || subscribersDB;
+    const ref = window.firebaseRef || subscribersRef;
+    const push = window.firebasePush || subscribersPush;
+    const get = window.firebaseGet || subscribersGet;
+    return { db, ref, push, get };
+}
+
 // Initialize EmailJS with detailed logging
 function initializeEmailJS() {
     try {
@@ -141,6 +149,13 @@ async function initializeSubscriberSystem() {
         subscribersRef = ref;
         subscribersPush = push;
         subscribersGet = get;
+
+        // Expose to window so other scripts (and handleSubscription) can always access Firebase.
+        // Do not overwrite if another page already registered these.
+        window.firebaseDB = window.firebaseDB || subscribersDB;
+        window.firebaseRef = window.firebaseRef || subscribersRef;
+        window.firebasePush = window.firebasePush || subscribersPush;
+        window.firebaseGet = window.firebaseGet || subscribersGet;
         
         console.log('%c✅ Subscriber System Initialized', 'color: green; font-weight: bold;');
         
@@ -188,13 +203,15 @@ async function handleSubscription(event) {
     }
     
     try {
-        // Check if email already subscribed
-        if (!window.firebaseDB || !window.firebaseGet || !window.firebaseRef || !window.firebasePush) {
+        const firebaseApi = getFirebaseSubscriberApi();
+
+        // Check if subscriber system is ready
+        if (!firebaseApi.db || !firebaseApi.get || !firebaseApi.ref || !firebaseApi.push) {
             showMessage('System not ready. Please try again later.', 'danger');
             return;
         }
         
-        const subscribersSnapshot = await window.firebaseGet(window.firebaseRef(window.firebaseDB, 'subscribers'));
+        const subscribersSnapshot = await firebaseApi.get(firebaseApi.ref(firebaseApi.db, 'subscribers'));
         let subscribers = [];
         
         if (subscribersSnapshot.exists()) {
@@ -217,8 +234,8 @@ async function handleSubscription(event) {
             active: true
         };
         
-        const subscribersRefPath = window.firebaseRef(window.firebaseDB, 'subscribers');
-        await window.firebasePush(subscribersRefPath, subscriberData);
+        const subscribersRefPath = firebaseApi.ref(firebaseApi.db, 'subscribers');
+        await firebaseApi.push(subscribersRefPath, subscriberData);
         
         console.log('%c✅ Subscriber added:', 'color: green;', email);
         
@@ -249,13 +266,14 @@ function showMessage(message, type) {
 // Get all active subscribers
 async function getActiveSubscribers() {
     try {
-        // Use Firebase initialized from admin.html
-        if (!window.firebaseDB || !window.firebaseGet || !window.firebaseRef) {
+        const firebaseApi = getFirebaseSubscriberApi();
+
+        if (!firebaseApi.db || !firebaseApi.get || !firebaseApi.ref) {
             console.warn('%c⚠️ Firebase not available, returning empty subscribers', 'color: orange;');
             return [];
         }
         
-        const subscribersSnapshot = await window.firebaseGet(window.firebaseRef(window.firebaseDB, 'subscribers'));
+        const subscribersSnapshot = await firebaseApi.get(firebaseApi.ref(firebaseApi.db, 'subscribers'));
         
         if (!subscribersSnapshot.exists()) {
             return [];
