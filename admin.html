@@ -926,6 +926,17 @@
                                     }
                                     logout();
                                 }
+
+                                // After modal closes, ensure focus returns to login form if visible
+                                try {
+                                    showLogin();
+                                    setTimeout(() => {
+                                        const u = document.getElementById('username');
+                                        if (u && typeof u.focus === 'function') u.focus();
+                                    }, 0);
+                                } catch (e) {
+                                    console.warn('Post-modal focus restore warning:', e);
+                                }
                             });
                         }
                         
