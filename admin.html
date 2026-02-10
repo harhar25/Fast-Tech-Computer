@@ -1144,6 +1144,39 @@
                     });
                 }
 
+                // If user dismisses MFA modal, immediately sign out + return to login
+                document.querySelectorAll('#mfaModal [data-bs-dismiss="modal"]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        try {
+                            mfaPending = false;
+
+                            const modalEl = document.getElementById('mfaModal');
+                            if (modalEl) {
+                                modalEl.classList.remove('show');
+                                modalEl.style.display = 'none';
+                                modalEl.setAttribute('aria-hidden', 'true');
+                                modalEl.removeAttribute('aria-modal');
+                                modalEl.removeAttribute('role');
+                            }
+
+                            document.body.classList.remove('modal-open');
+                            document.body.style.removeProperty('overflow');
+                            document.body.style.removeProperty('padding-right');
+                            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                        } catch (e) {
+                            console.warn('MFA dismiss cleanup warning:', e);
+                        }
+
+                        logout();
+
+                        // Try to restore focus to the login form
+                        setTimeout(() => {
+                            const u = document.getElementById('username');
+                            if (u && typeof u.focus === 'function') u.focus();
+                        }, 0);
+                    });
+                });
+
                 // Navigation
                 document.querySelectorAll('.sidebar .nav-link[data-section]').forEach(link => {
                     link.addEventListener('click', function(e) {
