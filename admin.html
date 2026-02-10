@@ -1148,6 +1148,13 @@
             firebaseRecaptchaVerifier = new window.firebaseRecaptchaVerifier(window.firebaseAuth, container, {
                 size: 'invisible'
             });
+            try {
+                if (firebaseRecaptchaVerifier && typeof firebaseRecaptchaVerifier.render === 'function') {
+                    firebaseRecaptchaVerifier.render();
+                }
+            } catch (e) {
+                console.warn('Recaptcha render warning:', e);
+            }
             return firebaseRecaptchaVerifier;
         }
 
@@ -1241,6 +1248,15 @@
                 const user = window.firebaseAuth.currentUser;
                 const session = await window.firebaseMultiFactor(user).getSession();
                 const recaptcha = ensureFirebaseRecaptchaVerifier();
+                if (!recaptcha) {
+                    if (mfaAlert) {
+                        mfaAlert.textContent = 'Verification system not ready. Please refresh and try again.';
+                        mfaAlert.classList.remove('d-none');
+                        mfaAlert.classList.remove('alert-success');
+                        mfaAlert.classList.add('alert-danger');
+                    }
+                    return;
+                }
                 const provider = new window.firebasePhoneAuthProvider(window.firebaseAuth);
                 mfaVerificationId = await provider.verifyPhoneNumber({ phoneNumber, session }, recaptcha);
 
@@ -1252,7 +1268,9 @@
                 }
             } catch (e) {
                 if (mfaAlert) {
-                    mfaAlert.textContent = 'Failed to send code. Please try again.';
+                    const code = (e && e.code) ? String(e.code) : '';
+                    const msg = (e && e.message) ? String(e.message) : '';
+                    mfaAlert.textContent = code || msg ? `Failed to send code: ${code || msg}` : 'Failed to send code. Please try again.';
                     mfaAlert.classList.remove('d-none');
                     mfaAlert.classList.remove('alert-success');
                     mfaAlert.classList.add('alert-danger');
