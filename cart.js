@@ -255,7 +255,7 @@ function createCheckoutModal() {
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <h6>Shipping Information</h6>
+                            <h6>Customer Information</h6>
                             <form id="checkoutForm">
                                 <div class="mb-3">
                                     <label class="form-label">Full Name *</label>
@@ -268,10 +268,6 @@ function createCheckoutModal() {
                                 <div class="mb-3">
                                     <label class="form-label">Phone *</label>
                                     <input type="tel" class="form-control" id="phone" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Address *</label>
-                                    <textarea class="form-control" id="address" rows="2" required></textarea>
                                 </div>
                             </form>
                         </div>
@@ -328,8 +324,7 @@ function processCheckout() {
         customer: {
             fullName: document.getElementById('fullName').value,
             email: document.getElementById('email').value,
-            phone: document.getElementById('phone').value,
-            address: document.getElementById('address').value
+            phone: document.getElementById('phone').value
         },
         date: new Date().toISOString()
     };

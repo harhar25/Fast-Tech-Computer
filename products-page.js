@@ -21,7 +21,49 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Initialize search
     initializeSearch();
+
+    // Initialize mobile filters drawer
+    initializeMobileFiltersDrawer();
 });
+
+function initializeMobileFiltersDrawer() {
+    const openBtn = document.getElementById('mobileFiltersBtn');
+    const closeBtn = document.getElementById('mobileCloseFiltersBtn');
+    const overlay = document.getElementById('filtersOverlay');
+    const filtersColumn = document.getElementById('filtersColumn');
+
+    if (!openBtn || !closeBtn || !overlay || !filtersColumn) return;
+
+    const setOpen = (open) => {
+        document.body.classList.toggle('filters-open', open);
+    };
+
+    const isMobile = () => window.matchMedia && window.matchMedia('(max-width: 991.98px)').matches;
+
+    const syncLayout = () => {
+        if (isMobile()) {
+            filtersColumn.style.display = 'contents';
+        } else {
+            setOpen(false);
+            filtersColumn.style.display = '';
+        }
+    };
+
+    openBtn.addEventListener('click', () => {
+        if (!isMobile()) return;
+        setOpen(true);
+    });
+
+    closeBtn.addEventListener('click', () => setOpen(false));
+    overlay.addEventListener('click', () => setOpen(false));
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setOpen(false);
+    });
+
+    window.addEventListener('resize', syncLayout);
+    syncLayout();
+}
 
 // Initialize Firebase
 async function initializeFirebase() {
@@ -311,7 +353,7 @@ function createRatingStars(rating) {
 // Apply filters
 function applyFilters() {
     const categoryFilters = getCheckedValues('#categoryFilters input[type="checkbox"]');
-    const brandFilters = getCheckedValues('#brandFilters input[type="checkbox"]');
+    const brandFilters = getCheckedValues('#brandFilters input[type="checkbox"], #brandFiltersExpand input[type="checkbox"]');
     const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
     const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
     const sortBy = document.getElementById('sortSelect').value;

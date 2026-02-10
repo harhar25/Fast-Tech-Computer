@@ -1318,6 +1318,45 @@ body {
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
 }
 
+.filters-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+  z-index: 1040;
+}
+
+@media (max-width: 991.98px) {
+  body.filters-open {
+    overflow: hidden;
+  }
+
+  body.filters-open .filters-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .filter-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: min(380px, 92vw);
+    max-width: 92vw;
+    transform: translateX(-105%);
+    transition: transform 260ms ease;
+    z-index: 1050;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.filters-open .filter-sidebar {
+    transform: translateX(0);
+  }
+}
+
 .section-title::after {
   content: '';
   position: absolute;

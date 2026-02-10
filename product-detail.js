@@ -245,23 +245,8 @@ function displayProductDetails(product) {
                     <ul class="list-unstyled">
                         <li><i class="bi bi-check-circle text-success me-2"></i>Premium Quality Components</li>
                         <li><i class="bi bi-check-circle text-success me-2"></i>Manufacturer Warranty</li>
-                        <li><i class="bi bi-check-circle text-success me-2"></i>Fast Shipping</li>
                         <li><i class="bi bi-check-circle text-success me-2"></i>Expert Support</li>
                     </ul>
-                </div>
-                
-                <div class="shipping-info mb-4">
-                    <h5>Shipping & Returns</h5>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p class="mb-2"><i class="bi bi-truck me-2"></i>Free shipping on orders over $100</p>
-                            <p class="mb-2"><i class="bi bi-clock me-2"></i>Fast delivery: 2-3 business days</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="mb-2"><i class="bi bi-arrow-repeat me-2"></i>30-day return policy</p>
-                            <p class="mb-2"><i class="bi bi-shield-check me-2"></i>1-year manufacturer warranty</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
