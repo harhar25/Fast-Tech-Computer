@@ -1003,10 +1003,44 @@
 
             // Clean up any leftover Bootstrap modal/backdrop state that can block clicks
             try {
+                mfaPending = false;
+
+                const activeEl = document.activeElement;
+                if (activeEl && typeof activeEl.blur === 'function') {
+                    activeEl.blur();
+                }
+
+                if (mfaModal && typeof mfaModal.hide === 'function') {
+                    try { mfaModal.hide(); } catch (e) {}
+                }
+
                 document.body.classList.remove('modal-open');
                 document.body.style.removeProperty('overflow');
                 document.body.style.removeProperty('padding-right');
                 document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+
+                // If a modal is stuck "shown" it can still intercept pointer events.
+                document.querySelectorAll('.modal.show').forEach(m => {
+                    m.classList.remove('show');
+                    m.style.display = 'none';
+                    m.setAttribute('aria-hidden', 'true');
+                });
+
+                // Also force-hide any other lingering modals.
+                document.querySelectorAll('.modal').forEach(m => {
+                    if (m.style && m.style.display && m.style.display !== 'none') {
+                        m.style.display = 'none';
+                    }
+                    m.setAttribute('aria-hidden', 'true');
+                });
+
+                const login = document.querySelector('.login-container');
+                if (login) login.style.pointerEvents = 'auto';
+
+                document.querySelectorAll('.login-container input, .login-container button').forEach(el => {
+                    if ('disabled' in el) el.disabled = false;
+                    if (typeof el.removeAttribute === 'function') el.removeAttribute('readonly');
+                });
             } catch (e) {
                 console.warn('Login UI cleanup warning:', e);
             }
