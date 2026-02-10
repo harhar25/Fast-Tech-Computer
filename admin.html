@@ -1000,6 +1000,16 @@
         // Show login section
         function showLogin() {
             document.body.classList.remove('dashboard-active');
+
+            // Clean up any leftover Bootstrap modal/backdrop state that can block clicks
+            try {
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            } catch (e) {
+                console.warn('Login UI cleanup warning:', e);
+            }
         }
 
         // Show dashboard section
@@ -2312,6 +2322,8 @@
             if (window.firebaseAuth && window.firebaseSignOut) {
                 window.firebaseSignOut(window.firebaseAuth).catch((e) => console.error('Sign out failed:', e));
             }
+
+            mfaPending = false;
             
             // Clear login form fields
             document.getElementById('username').value = '';
