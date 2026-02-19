@@ -41,7 +41,8 @@ body {
 .navbar {
   background: rgba(15, 23, 42, 0.95) !important;
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--gray-200);
+  /* remove visible light border under navbar to avoid thin white line above hero */
+  border-bottom: 0;
   z-index: 1030;
   position: relative;
   transition: all var(--transition-normal);
@@ -227,10 +228,23 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: fill;
+  object-fit: cover;
+  object-position: center;
+  background: #000;
   z-index: 0;
   opacity: 0.4;
   display: block;
+}
+
+/* Improve hero aspect and spacing on smaller screens */
+@media (max-width: 768px) {
+  .hero-section { min-height: 55vh; }
+  .hero-video { object-position: center top; }
+}
+
+@media (max-width: 576px) {
+  .hero-section { min-height: 50vh; }
+  .hero-video { object-position: center top; }
 }
 
 .hero-section::before {
