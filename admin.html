@@ -780,6 +780,26 @@
         </div>
     </div>
 
+    <!-- Category Products Modal -->
+    <div class="modal fade" id="categoryProductsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="categoryProductsTitle">Category Products</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="categoryProductsList" class="table-responsive">
+                        <!-- Category products will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- EmailJS with multiple CDN fallbacks -->
@@ -1489,7 +1509,10 @@
                     const count = currentProducts.filter(p => p.category === category).length;
                     return `
                         <div class="col-md-6 col-lg-4">
-                            <div class="card h-100" style="cursor: pointer; transition: all 150ms ease;">
+                            <div class="card h-100" style="cursor: pointer; transition: all 150ms ease; border: 2px solid transparent;" 
+                                 onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='0 0 10px rgba(59, 130, 246, 0.3)';"
+                                 onmouseout="this.style.borderColor='transparent'; this.style.boxShadow='none';"
+                                 onclick="showCategoryProductsModal('${category}')">
                                 <div class="card-body text-center">
                                     <i class="bi bi-folder fs-1 text-primary mb-2" style="display: block;"></i>
                                     <h5 class="card-title text-capitalize">${category.replace('-', ' ')}</h5>
@@ -1503,6 +1526,49 @@
             
             // Show modal
             const modal = new bootstrap.Modal(document.getElementById('categoriesModal'));
+            modal.show();
+        }
+
+        // Show products for a specific category
+        function showCategoryProductsModal(category) {
+            const categoryProducts = currentProducts
+                .filter(p => p.category === category)
+                .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
+            
+            const categoryProductsList = document.getElementById('categoryProductsList');
+            
+            if (categoryProducts.length === 0) {
+                categoryProductsList.innerHTML = '<p class="text-muted">No products in this category.</p>';
+            } else {
+                categoryProductsList.innerHTML = `
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Brand</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${categoryProducts.map(product => `
+                                <tr>
+                                    <td>${product.name}</td>
+                                    <td>${product.brand}</td>
+                                    <td>${formatPrice(product.price)}</td>
+                                    <td>${product.inStock !== false ? '<span class="badge bg-success">In Stock</span>' : '<span class="badge bg-danger">Out of Stock</span>'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+            
+            // Update modal title
+            document.getElementById('categoryProductsTitle').textContent = `${category.replace('-', ' ')} Products`;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('categoryProductsModal'));
             modal.show();
         }
 
