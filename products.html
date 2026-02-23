@@ -32,10 +32,10 @@
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="index.html" style="display: flex; align-items: center; gap:0.5rem;">
-                <img src="logo.png" alt="Fast Tech Logo" style="height: 75px;">
-                <span style="font-size:50px; line-height:1; display:inline-flex; align-items:flex-end; align-self:flex-end;">Fast Tech</span>
+        <div class="container-fluid px-0">
+            <a class="navbar-brand fw-bold" href="index.html" style="display: flex; align-items: baseline; gap:0.5rem;">
+                <img src="logo.png" alt="Fast Tech Logo" style="height: 75px; display:block;">
+                <span style="font-size:50px; line-height:1; display:inline-block; align-self:baseline;">Fast Tech</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -45,8 +45,19 @@
                     <li class="nav-item">
                         <a class="nav-link" href="index.html">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="products.html">Products</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button" style="pointer-events: auto; cursor: pointer;">Products</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="products.html?category=processors">Processors</a></li>
+                            <li><a class="dropdown-item" href="products.html?category=graphics-cards">Graphics Cards</a></li>
+                            <li><a class="dropdown-item" href="products.html?category=memory">Memory</a></li>
+                            <li><a class="dropdown-item" href="products.html?category=storage">Storage</a></li>
+                            <li><a class="dropdown-item" href="products.html?category=motherboards">Motherboards</a></li>
+                            <li><a class="dropdown-item" href="products.html?category=power-supplies">Power Supplies</a></li>
+                            <li><a class="dropdown-item" href="products.html?category=cooling">Cooling</a></li>
+                            <li><a class="dropdown-item" href="products.html?category=cases">Cases</a></li>
+                            <li><a class="dropdown-item" href="products.html?category=cctv-cameras">CCTV Cameras</a></li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="index.html#deals">Deals</a>
@@ -54,11 +65,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="index.html#contact">Contact</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="admin.html">
-                            <i class="bi bi-shield-lock"></i> Admin
-                        </a>
-                    </li>
+                    <!-- Admin link removed from navbar (hidden). Use keyboard shortcut to access admin login. -->
                 </ul>
                 <div class="d-flex align-items-center gap-3 navbar-search-cart">
                     <div class="input-group search-container-wrapper">
@@ -66,6 +73,9 @@
                             <i class="bi bi-search"></i>
                         </span>
                         <input type="text" class="form-control search-input" placeholder="Search products..." id="searchInput">
+                        <div class="search-results" id="searchResults" style="display: none;">
+                            <!-- Search results will appear here -->
+                        </div>
                     </div>
                 </div>
             </div>
