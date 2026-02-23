@@ -942,6 +942,7 @@
                         const password = document.getElementById('password').value;
                         const alertDiv = document.getElementById('loginAlert');
 
+                        /* TEMPORARY: Captcha disabled for local development
                         const captchaResponse = (window.grecaptcha && typeof window.grecaptcha.getResponse === 'function')
                             ? window.grecaptcha.getResponse()
                             : '';
@@ -954,6 +955,7 @@
                             }, 3000);
                             return;
                         }
+                        */
                         
                         if (!window.firebaseAuth || !window.firebaseSignInWithEmailAndPassword) {
                             alertDiv.textContent = 'Auth system not ready. Please refresh and try again.';
