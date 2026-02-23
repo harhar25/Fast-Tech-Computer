@@ -493,7 +493,7 @@
                         </div>
                     </div>
                     <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="stat-card">
+                        <div class="stat-card" style="cursor: pointer;" onclick="showInStockModal()" title="Click to view in-stock products">
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <h6 class="text-muted">In Stock</h6>
@@ -751,6 +751,26 @@
                 <div class="modal-body">
                     <div id="categoriesList" class="row g-3">
                         <!-- Categories will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- In Stock Products Modal -->
+    <div class="modal fade" id="inStockModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">In Stock Products</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="inStockList" class="table-responsive">
+                        <!-- In stock products will be populated here -->
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1483,6 +1503,48 @@
             
             // Show modal
             const modal = new bootstrap.Modal(document.getElementById('categoriesModal'));
+            modal.show();
+        }
+
+        // Show in-stock products in modal (sorted alphabetically)
+        function showInStockModal() {
+            const inStockProducts = currentProducts
+                .filter(p => p.inStock !== false)
+                .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
+            
+            const inStockList = document.getElementById('inStockList');
+            
+            if (inStockProducts.length === 0) {
+                inStockList.innerHTML = '<p class="text-muted">No in-stock products available.</p>';
+            } else {
+                inStockList.innerHTML = `
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Brand</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${inStockProducts.map(product => `
+                                <tr>
+                                    <td>${product.name}</td>
+                                    <td>${product.brand}</td>
+                                    <td class="text-capitalize">${product.category.replace('-', ' ')}</td>
+                                    <td>${formatPrice(product.price)}</td>
+                                    <td><span class="badge bg-success">In Stock</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('inStockModal'));
             modal.show();
         }
 
