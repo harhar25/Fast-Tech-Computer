@@ -9,6 +9,7 @@
     <link rel="apple-touch-icon" href="logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles-enterprise.css">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
         body {
@@ -112,7 +113,7 @@
             background-color: #f8f9fa;
         }
         .sidebar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: rgba(15, 23, 42, 0.95);
             min-height: 100vh;
             color: white;
             position: fixed;
@@ -412,9 +413,15 @@
         <div class="sidebar">
             <div class="position-sticky pt-3">
                 <div class="text-center mb-4">
-                    <i class="bi bi-cpu fs-1"></i>
-                    <h5 class="mt-2">Fast Tech Admin</h5>
-                    <small id="adminUser">Welcome, Admin</small>
+                    <div class="brand-stack">
+                        <img src="logo.png" alt="Fast Tech Logo" class="brand-logo">
+                        <div class="brand-lines">
+                            <span class="brand-line brand-line-top">FAST TECH</span>
+                            <span class="brand-line brand-line-bottom">COMPUTERS</span>
+                            <span class="brand-line brand-line-admin">ADMIN</span>
+                        </div>
+                    </div>
+                    <small id="adminUser" class="d-block mt-2">Welcome, Admin</small>
                 </div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
@@ -1498,15 +1505,36 @@
         }
 
         // Show all categories in modal
+        // Map categories to appropriate Bootstrap icons
+        const categoryIcons = {
+            'processors': 'bi-cpu',
+            'graphics-cards': 'bi-lightning-fill',
+            'memory': 'bi-memory',
+            'storage': 'bi-hdd',
+            'motherboards': 'bi-diagram-3',
+            'power-supplies': 'bi-lightning',
+            'cooling': 'bi-snow',
+            'cases': 'bi-box',
+            'cctv-cameras': 'bi-camera'
+        };
+
         function showCategoriesModal() {
             const categories = [...new Set(currentProducts.map(p => p.category))];
+            // Add missing categories from the navbar dropdown
+            const allCategories = [
+                'processors', 'graphics-cards', 'memory', 'storage', 
+                'motherboards', 'power-supplies', 'cooling', 'cases', 'cctv-cameras'
+            ];
+            const displayCategories = [...new Set([...categories, ...allCategories])];
+            
             const categoriesList = document.getElementById('categoriesList');
             
-            if (categories.length === 0) {
+            if (displayCategories.length === 0) {
                 categoriesList.innerHTML = '<div class="col-12"><p class="text-muted">No categories available.</p></div>';
             } else {
-                categoriesList.innerHTML = categories.map(category => {
+                categoriesList.innerHTML = displayCategories.map(category => {
                     const count = currentProducts.filter(p => p.category === category).length;
+                    const icon = categoryIcons[category] || 'bi-folder';
                     return `
                         <div class="col-md-6 col-lg-4">
                             <div class="card h-100" style="cursor: pointer; transition: all 150ms ease; border: 2px solid transparent;" 
@@ -1514,7 +1542,7 @@
                                  onmouseout="this.style.borderColor='transparent'; this.style.boxShadow='none';"
                                  onclick="showCategoryProductsModal('${category}')">
                                 <div class="card-body text-center">
-                                    <i class="bi bi-folder fs-1 text-primary mb-2" style="display: block;"></i>
+                                    <i class="bi ${icon} fs-1 text-primary mb-2" style="display: block;"></i>
                                     <h5 class="card-title text-capitalize">${category.replace('-', ' ')}</h5>
                                     <p class="card-text text-muted"><strong>${count}</strong> product${count !== 1 ? 's' : ''}</p>
                                 </div>

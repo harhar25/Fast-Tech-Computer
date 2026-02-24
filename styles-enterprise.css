@@ -69,6 +69,7 @@ body {
 .brand-logo {
   height: 75px;
   display: block;
+  margin: 0 auto; /* center logo horizontally */
 }
 
 .brand-lines {
@@ -88,6 +89,14 @@ body {
 
 .brand-line-bottom {
   font-weight: 700;
+}
+
+.brand-line-admin {
+  font-size: 30px;
+  font-weight: 800;
+  color: white;
+  display: block;
+  line-height: 1;
 }
 
 /* Ensure the centered class removes side margins so absolute centering is clean */
