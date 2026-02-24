@@ -900,6 +900,51 @@ body {
   transform: scale(1.05);
 }
 
+/* Out of Stock Styling */
+.product-card.out-of-stock {
+  opacity: 0.6;
+  filter: grayscale(100%);
+}
+
+.product-card.out-of-stock:hover {
+  transform: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #e2e8f0;
+}
+
+.product-card.out-of-stock .product-image img {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card.out-of-stock:hover .product-image img {
+  transform: none;
+}
+
+.out-of-stock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.out-of-stock-label {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 8px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
 /* Enhanced Buttons */
 .btn-hero {
   position: relative;
