@@ -49,16 +49,62 @@ body {
   align-items: baseline; /* align brand and nav content on same baseline */
 }
 
+/* Center the brand horizontally within the navbar (keeps nav flow intact) */
+.navbar .container-fluid {
+  position: relative;
+}
+
+/* Previously had an absolute-centering helper; brand centering is handled internally by `.brand-stack` now. */
+
+/* Brand stack: ensures logo and lines are centered inside the brand element */
+.navbar .brand-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%; /* expand to full width of navbar-brand */
+}
+
+/* Brand-specific elements (class-based sizes and typography) */
+.brand-logo {
+  height: 75px;
+  display: block;
+}
+
+.brand-lines {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.brand-line {
+  font-size: 30px;
+  font-weight: 800;
+  color: white;
+  display: block;
+  line-height: 1;
+}
+
+.brand-line-bottom {
+  font-weight: 700;
+}
+
+/* Ensure the centered class removes side margins so absolute centering is clean */
+.navbar .navbar-brand.centered {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 .navbar-brand {
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.025em;
   color: white !important;
-  display: flex;
-   align-items: baseline;
-  gap: 0.5rem;
-  margin-left: 0; /* ensure brand sits at left edge */
-  margin-right: 2rem; /* space between brand and nav links */
+  display: block; /* make the brand a block so its inner stack centers inside it */
+  margin: 0 1rem 0 0; /* small right gap before nav links */
+  padding-left: 30px; /* add left padding for spacing from navbar edge */
+  text-align: center; /* ensure children stay centered */
 }
 
 .navbar-brand i {
@@ -69,11 +115,6 @@ body {
 /* Ensure brand logo and title align to the same baseline */
 .navbar-brand img {
   display: block;
-  align-self: baseline;
-}
-
-.navbar-brand span {
-  align-self: baseline;
 }
 
 /* Keep the navbar toggler visually centered while content aligns to baseline */
