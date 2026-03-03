@@ -603,31 +603,42 @@ function initializeSmoothScrolling() {
     });
 }
 
-// Add hover effects with animation
+// Add hover effects with animation - Using event delegation for dynamic elements
 function addHoverEffects() {
     const canHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-    // Enhanced button hover effects
-    document.querySelectorAll('.btn-hero').forEach(button => {
-        button.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-2px)';
-        });
-        
-        button.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-        });
+    // Use mouseover/mouseout instead of mouseenter/mouseleave as they bubble up
+    // Enhanced button hover effects using event delegation
+    document.addEventListener('mouseover', function(e) {
+        const button = e.target.closest('.btn-hero');
+        if (button) {
+            button.style.transform = 'translateY(-2px)';
+        }
+    });
+    
+    document.addEventListener('mouseout', function(e) {
+        const button = e.target.closest('.btn-hero');
+        if (button) {
+            button.style.transform = 'translateY(0)';
+        }
     });
 
-    // Enhanced card hover effects
+    // Enhanced card hover effects using event delegation
     if (canHover) {
-        document.querySelectorAll('.category-card, .product-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-10px) scale(1.02)';
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0) scale(1)';
-            });
+        document.addEventListener('mouseover', function(e) {
+            const card = e.target.closest('.category-card, .product-card');
+            if (card) {
+                card.style.transform = 'translateY(-10px) scale(1.02)';
+                card.classList.add('is-hovered');
+            }
+        });
+        
+        document.addEventListener('mouseout', function(e) {
+            const card = e.target.closest('.category-card, .product-card');
+            if (card) {
+                card.style.transform = 'translateY(0) scale(1)';
+                card.classList.remove('is-hovered');
+            }
         });
     }
 }
@@ -814,7 +825,7 @@ function showNotification(message, type = 'info') {
     });
 }
 
-// Category card hover effects
+// Category card hover effects - Improved with proper mouse event handling
 document.addEventListener('DOMContentLoaded', function() {
     const cards = Array.from(document.querySelectorAll('.category-card'));
     if (cards.length === 0) return;
@@ -822,26 +833,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const canHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     const isMobileTouch = window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
+    // Desktop hover: Use event delegation with mouseover/mouseout
     if (canHover) {
-        cards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.classList.add('is-active');
-            });
+        document.addEventListener('mouseover', function(e) {
+            const card = e.target.closest('.category-card');
+            if (card) {
+                card.classList.add('is-active');
+            }
+        });
 
-            card.addEventListener('mouseleave', function() {
-                this.classList.remove('is-active');
-            });
+        document.addEventListener('mouseout', function(e) {
+            const card = e.target.closest('.category-card');
+            if (card) {
+                card.classList.remove('is-active');
+            }
         });
     }
 
+    // Mobile scroll detection: Use IntersectionObserver, but don't interfere with hover on desktop
     if (isMobileTouch) {
         let activeCard = null;
+        let isUserInteracting = false;
 
         const setActive = (next) => {
             if (activeCard === next) return;
-            if (activeCard) activeCard.classList.remove('is-active');
-            activeCard = next;
-            if (activeCard) activeCard.classList.add('is-active');
+            // Only update if user is not actively hovering
+            if (!isUserInteracting) {
+                if (activeCard) activeCard.classList.remove('is-active');
+                activeCard = next;
+                if (activeCard) activeCard.classList.add('is-active');
+            }
         };
 
         if ('IntersectionObserver' in window) {
@@ -882,12 +903,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
             cards.forEach(c => observer.observe(c));
 
+            // Track user interaction
+            document.addEventListener('touchstart', () => {
+                isUserInteracting = true;
+            }, { passive: true });
+
+            document.addEventListener('touchend', () => {
+                isUserInteracting = false;
+            }, { passive: true });
+
             const updateOnResize = () => {
-                if (!activeCard) return;
+                if (!activeCard || isUserInteracting) return;
                 const centerY = window.innerHeight / 2;
                 const rect = activeCard.getBoundingClientRect();
                 const elCenter = rect.top + rect.height / 2;
                 if (Math.abs(elCenter - centerY) > window.innerHeight * 0.25) {
+
                     setActive(null);
                 }
             };
