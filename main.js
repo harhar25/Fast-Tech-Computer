@@ -855,6 +855,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Trigger point above center - card hovers when its top reaches this line
                     const triggerY = window.innerHeight * 0.40;
+                    const tolerance = 100; // pixels - only activate if within this range
                     let best = null;
                     let bestDist = Infinity;
 
@@ -862,7 +863,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         const rect = el.getBoundingClientRect();
                         const cardTop = rect.top;
                         const dist = Math.abs(cardTop - triggerY);
-                        if (dist < bestDist) {
+                        
+                        // Only consider cards within tolerance threshold
+                        if (dist <= tolerance && dist < bestDist) {
                             bestDist = dist;
                             best = el;
                         }
