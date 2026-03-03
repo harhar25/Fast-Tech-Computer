@@ -184,6 +184,8 @@ function displayProductDetails(product) {
         </div>
     ` : '';
     
+    const isOutOfStock = product.inStock === false;
+
     const imageCarouselHtml = images.length > 1 ? `
         <div id="productCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
             <div class="carousel-inner">
@@ -198,14 +200,19 @@ function displayProductDetails(product) {
         </div>
         ${thumbnailsHtml}
     ` : `
-        <div class="product-image-large">
+        <div class="product-image-large ${isOutOfStock ? 'out-of-stock' : ''}">
             <img src="${product.image}" alt="${product.name}" class="img-fluid rounded w-100">
+            ${isOutOfStock ? `
+                <div class="out-of-stock-overlay">
+                    <div class="out-of-stock-label">Out of Stock</div>
+                </div>
+            ` : ''}
         </div>
     `;
     
     container.innerHTML = `
         <div class="col-lg-6 mb-4">
-            <div class="product-image-section">
+            <div class="product-image-section ${isOutOfStock ? 'out-of-stock' : ''}">
                 ${imageCarouselHtml}
             </div>
             ${badgeHtml}

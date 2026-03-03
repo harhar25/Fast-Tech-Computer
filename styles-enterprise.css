@@ -110,10 +110,10 @@ body {
   font-weight: 800;
   letter-spacing: -0.025em;
   color: white !important;
-  display: block; /* make the brand a block so its inner stack centers inside it */
+  display: flex; /* use flex to center children */
+  align-items: center;
+  justify-content: center; /* horizontally center the brand-stack */
   margin: 0 1rem 0 0; /* small right gap before nav links */
-  padding-left: 30px; /* add left padding for spacing from navbar edge */
-  text-align: center; /* ensure children stay centered */
 }
 
 .navbar-brand i {
@@ -943,6 +943,31 @@ body {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+/* Product detail - dim image section for out of stock products */
+.product-image-section.out-of-stock,
+.product-image-large.out-of-stock {
+  position: relative;
+}
+
+.product-image-section.out-of-stock img,
+.product-image-large.out-of-stock img {
+  filter: grayscale(100%);
+  opacity: 0.65;
+}
+
+.product-image-section.out-of-stock .out-of-stock-overlay,
+.product-image-large.out-of-stock .out-of-stock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
 }
 
 /* Enhanced Buttons */
