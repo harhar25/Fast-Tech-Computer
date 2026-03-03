@@ -768,14 +768,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (intersecting.length === 0) return;
 
-                    const centerY = window.innerHeight / 2;
+                    // 75% trigger point (above center)
+                    const triggerY = window.innerHeight * 0.75;
                     let best = null;
                     let bestDist = Infinity;
 
                     intersecting.forEach(el => {
                         const rect = el.getBoundingClientRect();
-                        const elCenter = rect.top + rect.height / 2;
-                        const dist = Math.abs(elCenter - centerY);
+                        const cardTop = rect.top;
+                        const dist = Math.abs(cardTop - triggerY);
                         if (dist < bestDist) {
                             bestDist = dist;
                             best = el;
@@ -787,7 +788,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 {
                     root: null,
                     threshold: [0.15, 0.3, 0.5, 0.75],
-                    rootMargin: '-40% 0px -40% 0px'
+                    rootMargin: '-25% 0px -25% 0px'
                 }
             );
 
