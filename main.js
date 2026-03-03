@@ -854,10 +854,24 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isMobileTouch) {
         let activeCard = null;
         let isUserInteracting = false;
+        const tolerance = 100; // pixels - range where a card can trigger
 
         const setActive = (next) => {
+            // If there's already an active card, don't switch to a new one unless it's far enough
+            if (activeCard !== null && activeCard !== next) {
+                const activeRect = activeCard.getBoundingClientRect();
+                const centerY = window.innerHeight / 2;
+                const activeCenter = activeRect.top + activeRect.height / 2;
+                const distFromCenter = Math.abs(activeCenter - centerY);
+                
+                // Only allow switching if the currently active card has moved far from center
+                if (distFromCenter <= tolerance) {
+                    return; // Keep the current card active
+                }
+            }
+
+            // Switch to the new card if it's different
             if (activeCard === next) return;
-            // Only update if user is not actively hovering
             if (!isUserInteracting) {
                 if (activeCard) activeCard.classList.remove('is-active');
                 activeCard = next;
@@ -874,16 +888,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (intersecting.length === 0) return;
 
-                    // Trigger point above center - card hovers when its top reaches this line
-                    const triggerY = window.innerHeight * 0.40;
-                    const tolerance = 100; // pixels - only activate if within this range
+                    // Trigger point at center - card hovers when its center reaches the viewport center
+                    const centerY = window.innerHeight * 0.5;
                     let best = null;
                     let bestDist = Infinity;
 
                     intersecting.forEach(el => {
                         const rect = el.getBoundingClientRect();
-                        const cardTop = rect.top;
-                        const dist = Math.abs(cardTop - triggerY);
+                        const cardCenter = rect.top + rect.height / 2;
+                        const dist = Math.abs(cardCenter - centerY);
                         
                         // Only consider cards within tolerance threshold
                         if (dist <= tolerance && dist < bestDist) {
@@ -917,7 +930,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const centerY = window.innerHeight / 2;
                 const rect = activeCard.getBoundingClientRect();
                 const elCenter = rect.top + rect.height / 2;
-                if (Math.abs(elCenter - centerY) > window.innerHeight * 0.25) {
+                if (Math.abs(elCenter - centerY) > tolerance) {
 
                     setActive(null);
                 }
@@ -935,7 +948,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const elCenter = rect.top + rect.height / 2;
                     const dist = Math.abs(elCenter - centerY);
 
-                    if (rect.bottom >= 0 && rect.top <= window.innerHeight && dist < bestDist) {
+                    if (rect.bottom >= 0 && rect.top <= window.innerHeight && dist <= tolerance && dist < bestDist) {
                         bestDist = dist;
                         best = el;
                     }
