@@ -637,7 +637,83 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeScrollAnimations();
     initializeSmoothScrolling();
     addHoverEffects();
+    initializeBackToTopButton();
 });
+
+// Back to Top Button
+function initializeBackToTopButton() {
+    // Create button element
+    const backToTopBtn = document.createElement('button');
+    backToTopBtn.id = 'backToTopBtn';
+    backToTopBtn.className = 'back-to-top';
+    backToTopBtn.innerHTML = '<i class="bi bi-arrow-up"></i>';
+    backToTopBtn.title = 'Back to Top';
+    document.body.appendChild(backToTopBtn);
+    
+    // Add styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .back-to-top:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        .back-to-top.show {
+            display: flex;
+            opacity: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .back-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Show/hide button based on scroll position
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    });
+    
+    // Scroll to top when clicked
+    backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+}
 
 // Newsletter subscription
 document.addEventListener('DOMContentLoaded', function() {
@@ -777,8 +853,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (intersecting.length === 0) return;
 
-                    // 75% trigger point (above center)
-                    const triggerY = window.innerHeight * 0.75;
+                    // Trigger point above center - card hovers when its top reaches this line
+                    const triggerY = window.innerHeight * 0.40;
                     let best = null;
                     let bestDist = Infinity;
 
