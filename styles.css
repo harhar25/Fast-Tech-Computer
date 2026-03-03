@@ -559,6 +559,10 @@ body {
   .navbar-brand i {
     font-size: 1.3rem;
   }
+
+  .brand-logo{
+    padding: 0.3rem 0.5rem !important;
+  }
   
   .navbar-nav .nav-link {
     padding: 0.3rem 0.5rem !important;

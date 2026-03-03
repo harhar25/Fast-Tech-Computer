@@ -377,13 +377,22 @@ function createProductCard(product) {
         `<span class="price-original">${formatPrice(product.originalPrice)}</span>` : '';
     
     const ratingHtml = createRatingStars(product.rating);
+
+    // Check if product is out of stock
+    const isOutOfStock = product.inStock === false;
+    const outOfStockClass = isOutOfStock ? 'out-of-stock' : '';
+    const outOfStockOverlay = isOutOfStock ? 
+        `<div class="out-of-stock-overlay">
+            <div class="out-of-stock-label">Out of Stock</div>
+        </div>` : '';
     
     return `
-        <div class="product-card" data-product-id="${product.id}">
+        <div class="product-card ${outOfStockClass}" data-product-id="${product.id}">
             <div class="product-image">
                 <a href="product.html?id=${product.id}" style="text-decoration: none; color: inherit;">
                     <img src="${product.image}" alt="${product.name}" style="cursor: pointer;">
                 </a>
+                ${outOfStockOverlay}
                 ${badgeHtml}
                 <div class="product-quick-actions">
                     <button class="quick-action-btn" onclick="handleOrderClick('${product.name}')" title="Make an Order for this Item">

@@ -41,10 +41,68 @@ body {
 .navbar {
   background: rgba(15, 23, 42, 0.95) !important;
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--gray-200);
+  /* remove visible light border under navbar to avoid thin white line above hero */
+  border-bottom: 0;
   z-index: 1030;
   position: relative;
   transition: all var(--transition-normal);
+  align-items: baseline; /* align brand and nav content on same baseline */
+}
+
+/* Center the brand horizontally within the navbar (keeps nav flow intact) */
+.navbar .container-fluid {
+  position: relative;
+}
+
+/* Previously had an absolute-centering helper; brand centering is handled internally by `.brand-stack` now. */
+
+/* Brand stack: ensures logo and lines are centered inside the brand element */
+.navbar .brand-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%; /* expand to full width of navbar-brand */
+}
+
+/* Brand-specific elements (class-based sizes and typography) */
+.brand-logo {
+  height: 75px;
+  display: block;
+  margin: 0 auto; /* center logo horizontally */
+}
+
+.brand-lines {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.brand-line {
+  font-size: 30px;
+  font-weight: 800;
+  color: white;
+  display: block;
+  line-height: 1;
+}
+
+.brand-line-bottom {
+  font-weight: 700;
+}
+
+.brand-line-admin {
+  font-size: 30px;
+  font-weight: 800;
+  color: white;
+  display: block;
+  line-height: 1;
+}
+
+/* Ensure the centered class removes side margins so absolute centering is clean */
+.navbar .navbar-brand.centered {
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .navbar-brand {
@@ -52,14 +110,25 @@ body {
   font-weight: 800;
   letter-spacing: -0.025em;
   color: white !important;
-  display: flex;
+  display: flex; /* use flex to center children */
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center; /* horizontally center the brand-stack */
+  margin: 0 1rem 0 0; /* small right gap before nav links */
 }
 
 .navbar-brand i {
   font-size: 1.8rem;
   color: var(--accent);
+}
+
+/* Ensure brand logo and title align to the same baseline */
+.navbar-brand img {
+  display: block;
+}
+
+/* Keep the navbar toggler visually centered while content aligns to baseline */
+.navbar .navbar-toggler {
+  align-self: center;
 }
 
 .navbar-nav .nav-link {
@@ -69,6 +138,20 @@ body {
   border-radius: var(--radius-lg);
   transition: all 150ms ease;
   position: relative;
+}
+
+/* Align navbar links with brand baseline */
+.navbar .navbar-collapse,
+.navbar .navbar-nav {
+  align-items: baseline;
+}
+
+.navbar-nav .nav-link {
+  display: inline-flex;
+  align-items: baseline;
+  line-height: 1;
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
 }
 
 .navbar-nav .nav-link:hover,
@@ -112,6 +195,66 @@ body {
   transition: all 150ms ease;
   position: relative;
   z-index: 100;
+}
+
+/* Mobile: center brand (logo + title) and place the toggler/menu below it */
+@media (max-width: 767.98px) {
+  .navbar {
+    align-items: center; /* override baseline for stacked mobile layout */
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .navbar .container-fluid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .navbar-brand {
+    justify-content: center;
+    margin-right: 0;
+    margin-left: 0;
+    margin-bottom: 0.5rem; /* space below logo/title */
+  }
+
+  .navbar-brand img {
+    height: 56px; /* slightly smaller logo on mobile */
+  }
+
+  .navbar .navbar-toggler {
+    order: 2;
+    align-self: center;
+  }
+
+  /* Smooth expand/collapse: animate max-height */
+  .navbar-collapse {
+    order: 3;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 320ms ease;
+  }
+
+  .navbar-collapse.show {
+    /* large enough to fit menu items; adjust if you have many links */
+    max-height: 420px;
+  }
+
+  .navbar-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+  }
+
+  .navbar-nav .nav-link {
+    padding: 0.5rem 1rem !important;
+    width: auto;
+    text-align: center;
+  }
 }
 
 .search-icon {
@@ -227,10 +370,23 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: fill;
+  object-fit: cover;
+  object-position: center;
+  background: #000;
   z-index: 0;
   opacity: 0.4;
   display: block;
+}
+
+/* Improve hero aspect and spacing on smaller screens */
+@media (max-width: 768px) {
+  .hero-section { min-height: 55vh; }
+  .hero-video { object-position: center top; }
+}
+
+@media (max-width: 576px) {
+  .hero-section { min-height: 50vh; }
+  .hero-video { object-position: center top; }
 }
 
 .hero-section::before {
@@ -742,6 +898,76 @@ body {
 
 .product-card:hover .product-image img {
   transform: scale(1.05);
+}
+
+/* Out of Stock Styling */
+.product-card.out-of-stock {
+  opacity: 0.6;
+  filter: grayscale(100%);
+}
+
+.product-card.out-of-stock:hover {
+  transform: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #e2e8f0;
+}
+
+.product-card.out-of-stock .product-image img {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card.out-of-stock:hover .product-image img {
+  transform: none;
+}
+
+.out-of-stock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.out-of-stock-label {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 8px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Product detail - dim image section for out of stock products */
+.product-image-section.out-of-stock,
+.product-image-large.out-of-stock {
+  position: relative;
+}
+
+.product-image-section.out-of-stock img,
+.product-image-large.out-of-stock img {
+  filter: grayscale(100%);
+  opacity: 0.65;
+}
+
+.product-image-section.out-of-stock .out-of-stock-overlay,
+.product-image-large.out-of-stock .out-of-stock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
 }
 
 /* Enhanced Buttons */
