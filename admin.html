@@ -1596,7 +1596,7 @@
                 if (imagesJson) {
                     try {
                         const images = JSON.parse(imagesJson);
-                        image = images.length > 0 ? images[0].data : ''; // Use first image as main image
+                        image = images.length > 0 ? images[0].base64 : ''; // Use first image as main image
                     } catch (e) {
                         console.error('Error parsing images:', e);
                     }
@@ -1655,10 +1655,31 @@
                 showAlert(`Adding product with ${images.length} image(s)...`, 'info');
                 
                 // Save to Firebase using push (creates automatic unique keys)
-                const categoryRef = window.firebaseRef(window.firebaseDB, `products/${newProduct.category}`);
-                const productRef = window.firebasePush(categoryRef, newProduct);
+                if (!window.firebaseRef || !window.firebaseDB || !window.firebasePush) {
+                    throw new Error('Firebase is not properly initialized. Please reload the page.');
+                }
                 
-                console.log('Product saved to Firebase with ID:', productRef.key);
+                const categoryRef = window.firebaseRef(window.firebaseDB, `products/${newProduct.category}`);
+                const categorySnapshot = await window.firebaseGet(categoryRef);
+                let categoryProducts = [];
+                
+                // Load existing products in this category
+                if (categorySnapshot.exists()) {
+                    const existingData = categorySnapshot.val();
+                    if (Array.isArray(existingData)) {
+                        categoryProducts = existingData;
+                    } else if (typeof existingData === 'object' && existingData !== null) {
+                        categoryProducts = Object.values(existingData);
+                    }
+                }
+                
+                // Add new product to the array
+                categoryProducts.push(newProduct);
+                
+                // Save updated array to Firebase
+                await window.firebaseSet(categoryRef, categoryProducts);
+                
+                console.log('Product saved to Firebase with ID:', newProduct.id);
                 
                 // Also update local products array
                 currentProducts.push(newProduct);

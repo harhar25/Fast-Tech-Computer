@@ -88,29 +88,46 @@ async function initializeFirebase() {
         firebaseRef = ref;
         firebaseGet = get;
         
-        console.log('Firebase initialized for products page');
+        console.log('%c✅ Firebase initialized for products page', 'color: green; font-weight: bold;');
+        return true;
     } catch (error) {
-        console.error('Error initializing Firebase:', error);
+        console.error('%c❌ Error initializing Firebase on products page:', 'color: red; font-weight: bold;', error);
+        return false;
     }
 }
 
 // Load products from Firebase
 async function loadProductsFromFirebase() {
     try {
+        // Check if Firebase is fully initialized
         if (!firebaseDB || !firebaseRef || !firebaseGet) {
-            console.error('❌ Firebase not initialized');
-            console.log('Firebase not available, using empty product list');
+            console.error('❌ Firebase not initialized on products page');
             displayProducts([]);
             return;
         }
         
         console.log('🔄 Loading products from Firebase on products page...');
+        
+        // Verify Firebase connection is working  
+        if (!firebaseDB.app) {
+            console.error('❌ Firebase app instance not available on products page');
+            displayProducts([]);
+            return;
+        }
+        
         const productsRef = firebaseRef(firebaseDB, 'products');
         const snapshot = await firebaseGet(productsRef);
         
         if (snapshot.exists()) {
             const data = snapshot.val();
             console.log('✅ Firebase data received on products page:', data);
+            
+            // Validate data structure
+            if (!data || (typeof data !== 'object')) {
+                console.error('❌ Invalid data structure from Firebase:', typeof data);
+                showProductsEmptyState();
+                return;
+            }
             
             // Update the local products array from Firebase
             updateProductsFromFirebase(data);
@@ -132,6 +149,12 @@ async function loadProductsFromFirebase() {
         }
     } catch (error) {
         console.error('❌ Error loading products from Firebase:', error);
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
         displayProducts([]);
     }
 }

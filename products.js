@@ -150,30 +150,67 @@ function updateProductsFromFirebase(firebaseData) {
         products[category] = [];
     });
     
+    // Validate input
+    if (!firebaseData || typeof firebaseData !== 'object') {
+        console.error('❌ Invalid Firebase data format:', typeof firebaseData);
+        return;
+    }
+    
     // Load products from Firebase
-    if (firebaseData && typeof firebaseData === 'object') {
+    try {
         Object.keys(firebaseData).forEach(category => {
+            // Only process known categories
             if (products.hasOwnProperty(category)) {
                 const categoryData = firebaseData[category];
+                
+                if (!categoryData) {
+                    console.log(`⚠️ Category "${category}" is empty or null`);
+                    products[category] = [];
+                    return;
+                }
                 
                 // Firebase can return data in two formats:
                 // 1. Array: [{...}, {...}]
                 // 2. Object with numeric keys: {0: {...}, 1: {...}}
                 
-                if (Array.isArray(categoryData)) {
-                    // Already an array, use directly
-                    products[category] = categoryData;
-                    console.log(`✅ Category "${category}" loaded as array: ${categoryData.length} products`);
-                } else if (typeof categoryData === 'object' && categoryData !== null) {
-                    // Convert object to array
-                    const convertedArray = Object.values(categoryData);
-                    products[category] = convertedArray;
-                    console.log(`✅ Category "${category}" converted from object to array: ${convertedArray.length} products`);
-                } else {
-                    console.log(`⚠️ Category "${category}" has invalid data format:`, categoryData);
+                try {
+                    if (Array.isArray(categoryData)) {
+                        // Already an array, use directly
+                        // Validate array elements
+                        const validProducts = categoryData.filter(item => {
+                            if (!item || typeof item !== 'object') {
+                                console.warn(`⚠️ Invalid product item in category "${category}":`, item);
+                                return false;
+                            }
+                            return true;
+                        });
+                        products[category] = validProducts;
+                        console.log(`✅ Category "${category}" loaded as array: ${validProducts.length} valid products`);
+                    } else if (typeof categoryData === 'object' && categoryData !== null) {
+                        // Convert object to array
+                        const convertedArray = Object.values(categoryData).filter(item => {
+                            if (!item || typeof item !== 'object') {
+                                console.warn(`⚠️ Invalid product item in category "${category}":`, item);
+                                return false;
+                            }
+                            return true;
+                        });
+                        products[category] = convertedArray;
+                        console.log(`✅ Category "${category}" converted from object to array: ${convertedArray.length} valid products`);
+                    } else {
+                        console.warn(`⚠️ Category "${category}" has invalid data type:`, typeof categoryData);
+                        products[category] = [];
+                    }
+                } catch (conversionError) {
+                    console.error(`❌ Error processing category "${category}":`, conversionError);
+                    products[category] = [];
                 }
+            } else {
+                console.log(`ℹ️ Skipping unknown category: "${category}"`);
             }
         });
+    } catch (error) {
+        console.error('❌ Error processing Firebase data:', error);
     }
     
     const totalProducts = getAllProducts().length;

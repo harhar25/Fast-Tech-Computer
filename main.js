@@ -16,8 +16,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load Firebase SDK
     try {
         console.log('%c🔄 Starting Firebase initialization...', 'color: orange; font-weight: bold;');
-        const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js");
-        const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js");
+        try {
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js");
+            const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js");
         
         // Firebase configuration
         const firebaseConfig = {
@@ -30,14 +31,19 @@ document.addEventListener('DOMContentLoaded', async function() {
             appId: "1:503689724923:web:0c6196cdffc88905dc415e"
         };
         
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        firebaseDB = getDatabase(app);
-        firebaseRef = ref;
-        firebaseGet = get;
-        
-        console.log('%c✅ Firebase initialized for main website', 'color: green; font-weight: bold;');
-        console.log('Firebase DB instance:', firebaseDB);
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            firebaseDB = getDatabase(app);
+            firebaseRef = ref;
+            firebaseGet = get;
+            
+            console.log('%c✅ Firebase initialized for main website', 'color: green; font-weight: bold;');
+            console.log('Firebase DB instance:', firebaseDB);
+        } catch (importError) {
+            console.error('%c❌ Firebase import error:', 'color: red; font-weight: bold;', importError);
+            showEmptyState();
+            return;
+        }
         
         // Load products from Firebase first, then display
         console.log('%c🔄 Calling loadProductsFromFirebase()...', 'color: blue;');
@@ -161,20 +167,36 @@ function showEmptyState() {
 // Load products from Firebase
 async function loadProductsFromFirebase() {
     try {
+        // Check if Firebase is fully initialized
         if (!firebaseDB || !firebaseRef || !firebaseGet) {
-            console.error('❌ Firebase not initialized');
-            console.log('Firebase not available, using empty product list');
+            console.error('❌ Firebase not initialized - critical components missing');
+            console.error('firebaseDB:', !!firebaseDB, 'firebaseRef:', !!firebaseRef, 'firebaseGet:', !!firebaseGet);
             showEmptyState();
             return;
         }
         
         console.log('🔄 Attempting to load products from Firebase...');
+        
+        // Verify Firebase connection is working
+        if (!firebaseDB.app) {
+            console.error('❌ Firebase app instance not available');
+            showEmptyState();
+            return;
+        }
+        
         const productsRef = firebaseRef(firebaseDB, 'products');
         const snapshot = await firebaseGet(productsRef);
         
         if (snapshot.exists()) {
             const data = snapshot.val();
             console.log('✅ Firebase snapshot received:', data);
+            
+            // Validate data structure
+            if (!data || (typeof data !== 'object')) {
+                console.error('❌ Invalid data structure from Firebase:', typeof data);
+                showEmptyState();
+                return;
+            }
             
             // Update the local products array from Firebase
             updateProductsFromFirebase(data);
@@ -184,7 +206,7 @@ async function loadProductsFromFirebase() {
             console.log('📋 All products:', allProducts);
             
             if (allProducts.length === 0) {
-                console.warn('⚠️ No products in Firebase');
+                console.warn('⚠️ No products in Firebase (but connection successful)');
                 showEmptyState();
             }
         } else {
@@ -193,6 +215,12 @@ async function loadProductsFromFirebase() {
         }
     } catch (error) {
         console.error('❌ Error loading products from Firebase:', error);
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
         showEmptyState();
     }
 }
