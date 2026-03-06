@@ -43,7 +43,7 @@ function getFeaturedProducts(limit = 8) {
 // Get deal products
 function getDealProducts(limit = 4) {
     return getAllProducts()
-        .filter(product => product.originalPrice && product.originalPrice > product.price)
+        .filter(product => product.badge === 'sale')
         .slice(0, limit);
 }
 

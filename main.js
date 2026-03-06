@@ -255,10 +255,10 @@ function loadFeaturedProducts() {
         return;
     }
     
-    // Filter for featured products (products with badge "new", "hot", or no badge)
+    // Filter for featured products (products with badge "new" or "hot" only)
     const featuredProducts = allProducts.filter(product => {
         console.log(`🔍 Checking product: ${product.name}, badge: ${product.badge}`);
-        return !product.badge || product.badge === 'new' || product.badge === 'hot';
+        return product.badge === 'new' || product.badge === 'hot';
     }).slice(0, 8);
     
     console.log('⭐ Featured products found:', featuredProducts.length);
@@ -298,25 +298,28 @@ function loadDealProducts() {
         console.log('❌ dealProducts container not found');
         return;
     }
-    if (!container) return;
     
     // Get products from Firebase data
     const allProducts = getAllProducts();
     
-    // Filter for products with sale badge or original price (indicating discount)
+    // Filter for products with sale badge only
     const dealProducts = allProducts.filter(product => 
-        product.badge === 'sale' || product.originalPrice
+        product.badge === 'sale'
     ).slice(0, 4);
     
     if (dealProducts.length === 0) {
+        console.log('❌ No sale products found, showing mascot placeholder');
         container.innerHTML = `
             <div class="col-12 text-center py-5">
-                <i class="bi bi-tag display-1 text-muted mb-3"></i>
-                <h4>No Deals Available</h4>
-                <p class="text-muted">Special deals will appear here once added by the administrator</p>
+                <div style="max-width: 400px; margin: 0 auto;">
+                    <img src="fastTechMascot.png" alt="Fast Tech Mascot" style="max-width: 300px; height: auto; margin-bottom: 1.5rem; border-radius: 10px;">
+                    <h4 class="text-dark">More Exclusive Products Coming Soon!</h4>
+                    <p class="text-muted">Stay tuned for amazing exclusive deals on premium computer components.</p>
+                </div>
             </div>
         `;
     } else {
+        console.log('✅ Sale products found:', dealProducts.length);
         container.innerHTML = dealProducts.map(product => createProductCard(product)).join('');
         
         // Load real reviews for each product card
