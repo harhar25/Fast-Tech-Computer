@@ -185,6 +185,23 @@ function displayProductDetails(product) {
     ` : '';
     
     const isOutOfStock = product.inStock === false;
+    
+    // Stock status display
+    const quantity = product.quantity || 0;
+    const lowStockLevel = product.lowStockLevel || 5;
+    let stockStatusBadge = '';
+    let stockStatusDisplay = '';
+    
+    if (quantity === 0) {
+        stockStatusBadge = '<span class="badge bg-danger me-2">Out of Stock</span>';
+        stockStatusDisplay = '<p class="text-danger" style="font-weight: 500;"><i class="bi bi-x-circle"></i> This product is currently out of stock</p>';
+    } else if (quantity < lowStockLevel) {
+        stockStatusBadge = '<span class="badge bg-warning me-2">Low Stock</span>';
+        stockStatusDisplay = `<p class="text-warning" style="font-weight: 500;"><i class="bi bi-exclamation-triangle"></i> Only <strong>${quantity}</strong> item(s) left in stock!</p>`;
+    } else {
+        stockStatusBadge = '<span class="badge bg-success me-2">In Stock</span>';
+        stockStatusDisplay = `<p class="text-success" style="font-weight: 500;"><i class="bi bi-check-circle"></i> <strong>${quantity}</strong> in stock</p>`;
+    }
 
     const imageCarouselHtml = images.length > 1 ? `
         <div id="productCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
@@ -232,17 +249,16 @@ function displayProductDetails(product) {
                 
                 <div class="mb-4">
                     <div class="d-flex align-items-center mb-3">
-                        <span class="badge bg-${product.inStock ? 'success' : 'danger'} me-2">
-                            ${product.inStock ? 'In Stock' : 'Out of Stock'}
-                        </span>
+                        ${stockStatusBadge}
                         <span class="text-muted">Brand: ${product.brand}</span>
                     </div>
+                    ${stockStatusDisplay}
                 </div>
                 
                 <div class="d-flex gap-3 mb-4">
-                    <button class="btn btn-primary btn-lg ${!product.inStock ? 'disabled' : ''}" 
+                    <button class="btn btn-primary btn-lg ${quantity === 0 ? 'disabled' : ''}" 
                             onclick="handleOrderClick('${product.name}')" 
-                            ${!product.inStock ? 'disabled' : ''}>
+                            ${quantity === 0 ? 'disabled' : ''}>
                         <i class="bi bi-facebook"></i> Make an Order for this Item
                     </button>
                 </div>

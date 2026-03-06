@@ -321,6 +321,19 @@ function createProductCard(product) {
     
     const ratingHtml = createRatingStars(product.rating);
     
+    // Stock status
+    const quantity = product.quantity || 0;
+    const lowStockLevel = product.lowStockLevel || 5;
+    let stockStatusHtml = '';
+    
+    if (quantity === 0) {
+        stockStatusHtml = '<p class="stock-status out-of-stock"><i class="bi bi-x-circle"></i> Out of Stock</p>';
+    } else if (quantity < lowStockLevel) {
+        stockStatusHtml = `<p class="stock-status low-stock"><i class="bi bi-exclamation-triangle"></i> Only ${quantity} left!</p>`;
+    } else {
+        stockStatusHtml = `<p class="stock-status in-stock"><i class="bi bi-check-circle"></i> In Stock (${quantity})</p>`;
+    }
+    
     return `
         <div class="col-md-6 col-lg-4">
             <div class="product-card">
@@ -339,9 +352,10 @@ function createProductCard(product) {
                         ${formatPrice(product.price)}
                         ${originalPriceHtml}
                     </div>
+                    ${stockStatusHtml}
                     <div class="d-grid gap-2">
                         <a href="product.html?id=${product.id}" class="btn btn-outline-primary">View Details</a>
-                        <button class="btn btn-primary order-btn" onclick="handleOrderClick('${product.name}')">
+                        <button class="btn btn-primary order-btn" onclick="handleOrderClick('${product.name}')" ${quantity === 0 ? 'disabled' : ''}>
                             <i class="bi bi-facebook"></i> Make an Order
                         </button>
                     </div>

@@ -622,6 +622,16 @@
                                     <input type="number" class="form-control" id="newProductPrice" step="0.01" required>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Stock Quantity</label>
+                                    <input type="number" class="form-control" id="newProductQuantity" min="0" value="0" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Low Stock Warning Level</label>
+                                    <input type="number" class="form-control" id="newProductLowStockLevel" min="0" value="5" required>
+                                </div>
+                            </div>
                             <div class="mb-3">
                                 <label class="form-label">Description</label>
                                 <textarea class="form-control" id="newProductDescription" rows="3" required></textarea>
@@ -711,6 +721,16 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Price</label>
                                 <input type="number" class="form-control" id="editProductPrice" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Stock Quantity</label>
+                                <input type="number" class="form-control" id="editProductQuantity" min="0" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Low Stock Warning Level</label>
+                                <input type="number" class="form-control" id="editProductLowStockLevel" min="0" required>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -1414,13 +1434,25 @@
                     product.category.toLowerCase().includes(searchTerm.toLowerCase())
                 );
                 
+                // Determine stock status
+                const qty = product.quantity || 0;
+                const lowStock = product.lowStockLevel || 5;
+                let stockBadge = '';
+                if (qty === 0) {
+                    stockBadge = '<span class="badge bg-danger">Out</span>';
+                } else if (qty < lowStock) {
+                    stockBadge = '<span class="badge bg-warning">Low Stock</span>';
+                } else {
+                    stockBadge = '<span class="badge bg-success">In Stock</span>';
+                }
+                
                 return `
                     <div class="product-card ${isSearchMatch ? 'search-match' : ''}">
                         <div class="row align-items-center">
                             <div class="col-md-2">
                                 <img src="${product.image}" alt="${product.name}" class="product-image">
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <h6 class="mb-1">${highlightText(product.name, searchTerm)}</h6>
                                 <p class="text-muted mb-1 small">${highlightText(product.description, searchTerm)}</p>
                                 <span class="badge bg-secondary badge-category">${highlightText(product.category, searchTerm)}</span>
@@ -1434,6 +1466,12 @@
                                 </div>
                             </div>
                             <div class="col-md-2">
+                                <div class="text-center">
+                                    <p class="mb-1"><strong>${qty}</strong><br><small class="text-muted">units</small></p>
+                                    ${stockBadge}
+                                </div>
+                            </div>
+                            <div class="col-md-1">
                                 <div class="text-end">
                                     <button class="btn btn-sm btn-outline-primary btn-action" onclick="editProduct('${product.id}')">
                                         <i class="bi bi-pencil"></i>
@@ -1615,18 +1653,32 @@
                                 <th>Product Name</th>
                                 <th>Brand</th>
                                 <th>Price</th>
-                                <th>Stock</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${categoryProducts.map(product => `
-                                <tr>
-                                    <td>${product.name}</td>
-                                    <td>${product.brand}</td>
-                                    <td>${formatPrice(product.price)}</td>
-                                    <td>${product.inStock !== false ? '<span class="badge bg-success">In Stock</span>' : '<span class="badge bg-danger">Out of Stock</span>'}</td>
-                                </tr>
-                            `).join('')}
+                            ${categoryProducts.map(product => {
+                                const qty = product.quantity || 0;
+                                const lowStock = product.lowStockLevel || 5;
+                                let statusBadge = '';
+                                if (qty === 0) {
+                                    statusBadge = '<span class="badge bg-danger">Out</span>';
+                                } else if (qty < lowStock) {
+                                    statusBadge = '<span class="badge bg-warning">Low</span>';
+                                } else {
+                                    statusBadge = '<span class="badge bg-success">In Stock</span>';
+                                }
+                                return `
+                                    <tr>
+                                        <td>${product.name}</td>
+                                        <td>${product.brand}</td>
+                                        <td>${formatPrice(product.price)}</td>
+                                        <td><strong>${qty}</strong></td>
+                                        <td>${statusBadge}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
                         </tbody>
                     </table>
                 `;
@@ -1659,19 +1711,33 @@
                                 <th>Brand</th>
                                 <th>Category</th>
                                 <th>Price</th>
+                                <th>Quantity</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${inStockProducts.map(product => `
-                                <tr>
-                                    <td>${product.name}</td>
-                                    <td>${product.brand}</td>
-                                    <td class="text-capitalize">${product.category.replace('-', ' ')}</td>
-                                    <td>${formatPrice(product.price)}</td>
-                                    <td><span class="badge bg-success">In Stock</span></td>
-                                </tr>
-                            `).join('')}
+                            ${inStockProducts.map(product => {
+                                const qty = product.quantity || 0;
+                                const lowStock = product.lowStockLevel || 5;
+                                let statusBadge = '';
+                                if (qty === 0) {
+                                    statusBadge = '<span class="badge bg-danger">Out</span>';
+                                } else if (qty < lowStock) {
+                                    statusBadge = '<span class="badge bg-warning">Low</span>';
+                                } else {
+                                    statusBadge = '<span class="badge bg-success">In Stock</span>';
+                                }
+                                return `
+                                    <tr>
+                                        <td>${product.name}</td>
+                                        <td>${product.brand}</td>
+                                        <td class="text-capitalize">${product.category.replace('-', ' ')}</td>
+                                        <td>${formatPrice(product.price)}</td>
+                                        <td><strong>${qty}</strong></td>
+                                        <td>${statusBadge}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
                         </tbody>
                     </table>
                 `;
@@ -1891,6 +1957,8 @@
                     })),
                     originalPrice: originalPrice ? parseFloat(originalPrice) : null,
                     badge: badge,
+                    quantity: parseInt(document.getElementById('newProductQuantity').value) || 0,
+                    lowStockLevel: parseInt(document.getElementById('newProductLowStockLevel').value) || 5,
                     inStock: true,
                     rating: 4.5,
                     reviews: 0
@@ -2014,6 +2082,16 @@
                 editProductBadge.value = product.badge || '';
                 editProductInStock.value = product.inStock !== false ? 'true' : 'false';
                 
+                // Load stock fields
+                const editProductQuantity = document.getElementById('editProductQuantity');
+                const editProductLowStockLevel = document.getElementById('editProductLowStockLevel');
+                if (editProductQuantity) {
+                    editProductQuantity.value = product.quantity || 0;
+                }
+                if (editProductLowStockLevel) {
+                    editProductLowStockLevel.value = product.lowStockLevel || 5;
+                }
+                
                 // Clear file input and image list
                 editProductImageFiles.value = '';
                 editImageList.innerHTML = '';
@@ -2089,6 +2167,8 @@
                 images: images,
                 originalPrice: document.getElementById('editProductOriginalPrice').value ? parseFloat(document.getElementById('editProductOriginalPrice').value) : null,
                 badge: document.getElementById('editProductBadge').value,
+                quantity: parseInt(document.getElementById('editProductQuantity').value) || 0,
+                lowStockLevel: parseInt(document.getElementById('editProductLowStockLevel').value) || 5,
                 inStock: document.getElementById('editProductInStock').value === 'true'
             };
             
