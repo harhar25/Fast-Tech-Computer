@@ -113,7 +113,8 @@ body {
   display: flex; /* use flex to center children */
   align-items: center;
   justify-content: center; /* horizontally center the brand-stack */
-  margin: 0 1rem 0 0; /* small right gap before nav links */
+  /* small right margin keeps brand from running into search bar */
+  margin-right: 1rem;
 }
 
 .navbar-brand i {
@@ -228,6 +229,8 @@ body {
   align-items: center;
   justify-content: flex-end;
   flex-wrap: nowrap;
+  /* ensure some spacing from right viewport edge */
+  margin-right: 1rem;
 }
 
 .search-container-wrapper {
@@ -250,7 +253,8 @@ body {
     padding-bottom: 0.5rem;
   }
 
-  .navbar .container-fluid {
+  /* container was changed from fluid to fixed; ensure mobile stacking still occurs */
+  .navbar .container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -394,6 +398,52 @@ body {
   transition: all 150ms ease;
 }
 
+/* Footer brand adjustments */
+.footer-brand-logo {
+  height: 60px; /* slightly smaller than navbar logo */
+}
+
+footer .brand-lines .brand-line {
+  font-size: 1.25rem; /* reduce text size in footer */
+}
+
+/* footer tagline glow */
+.footer-tagline {
+  margin-top: 0.5rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(59, 130, 246, 0.8),
+               0 0 16px rgba(59, 130, 246, 0.5);
+  transition: text-shadow 0.25s ease;
+}
+.footer-tagline:hover {
+  text-shadow: 0 0 12px rgba(59, 130, 246, 1),
+               0 0 24px rgba(59, 130, 246, 0.75);
+}
+
+/* footer contact details alignment */
+.contact-details p {
+  margin-bottom: 0.25rem;
+}
+
+/* follow icons larger on desktop */
+.footer-follow-icons .bi {
+  font-size: 1.5rem;
+}
+
+/* responsive adjustments for mobile */
+@media (max-width: 767.98px) {
+  .contact-details {
+    justify-content: center !important;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .footer-follow-icons {
+    justify-content: center !important;
+  }
+}
+
 #cartBtn:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
@@ -409,6 +459,17 @@ body {
   align-items: center;
 }
 
+/* glowing subtitle effect for hero */
+.hero-subtitle.glow {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.8),
+               0 0 20px rgba(59, 130, 246, 0.5);
+  transition: text-shadow 0.3s ease;
+}
+.hero-subtitle.glow:hover {
+  text-shadow: 0 0 14px rgba(59, 130, 246, 1),
+               0 0 28px rgba(59, 130, 246, 0.75);
+}
 .hero-video {
   position: absolute;
   top: 0;
