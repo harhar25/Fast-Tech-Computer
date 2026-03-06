@@ -44,19 +44,8 @@
                     <li class="nav-item">
                         <a class="nav-link" href="index.html">Home</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button" style="pointer-events: auto; cursor: pointer;">Products</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="products.html?category=processors">Processors</a></li>
-                            <li><a class="dropdown-item" href="products.html?category=graphics-cards">Graphics Cards</a></li>
-                            <li><a class="dropdown-item" href="products.html?category=memory">Memory</a></li>
-                            <li><a class="dropdown-item" href="products.html?category=storage">Storage</a></li>
-                            <li><a class="dropdown-item" href="products.html?category=motherboards">Motherboards</a></li>
-                            <li><a class="dropdown-item" href="products.html?category=power-supplies">Power Supplies</a></li>
-                            <li><a class="dropdown-item" href="products.html?category=cooling">Cooling</a></li>
-                            <li><a class="dropdown-item" href="products.html?category=cases">Cases</a></li>
-                            <li><a class="dropdown-item" href="products.html?category=cctv-cameras">CCTV Cameras</a></li>
-                        </ul>
+                    <li class="nav-item">
+                        <a class="nav-link" href="products.html">Products</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="index.html#deals">Deals</a>
@@ -131,21 +120,28 @@
     <!-- Footer -->
     <footer id="contact" class="bg-dark text-white py-4">
         <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5 style="display:flex; align-items:flex-end; gap:0.5rem; margin:0;">
-                        <img src="logo.png" alt="Fast Tech Logo" style="height:40px;">
-                        <span style="font-size:30px; line-height:1; display:inline-flex; align-items:flex-end; align-self:flex-end;">Fast Tech</span>
-                    </h5>
-                    <p>Service you can trust, Quality you can afford</p>
+            <!-- unified footer row: brand, contact, follow -->
+            <div class="row gy-4 align-items-center">
+                <div class="col-12 col-md-4 text-center">
+                    <a class="navbar-brand fw-bold">
+                        <div class="brand-stack">
+                            <img src="logo.png" alt="Fast Tech Logo" class="brand-logo footer-brand-logo">
+                            <div class="brand-lines">
+                                <span class="brand-line brand-line-top">FAST TECH</span>
+                                <span class="brand-line brand-line-bottom">COMPUTERS</span>
+                            </div>
+                        </div>
+                    </a>
+                    <p class="mb-0 footer-tagline">Service you can trust, Quality you can afford</p>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4 text-center text-md-start d-flex flex-column align-items-center align-items-md-start contact-block">
                     <h5>Contact Info</h5>
-                    <p><i class="bi bi-telephone"></i>+639268571232</p>
-                    <p><i class="bi bi-envelope"></i> sales@fasttechcomputers.ph</p>
+                    <p><i class="bi bi-telephone footer-icon"></i> <a href="tel:+639268571232" class="text-white text-decoration-none">+63 926 857 1232</a></p>
+                    <p><i class="bi bi-envelope footer-icon"></i> <a href="mailto:sales@fasttechcomputers.ph" class="text-white text-decoration-none">sales@fasttechcomputers.ph</a></p>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4 text-center text-md-start d-flex flex-column align-items-center align-items-md-start social-block">
                     <h5>Follow Us</h5>
+
                     <div class="d-flex gap-3">
                         <a href="https://www.facebook.com/profile.php?id=100064328760462" target="_blank" class="text-white"><i class="bi bi-facebook"></i></a>
                         <a href="https://www.instagram.com/fasttech2023/" target="_blank" class="text-white"><i class="bi bi-instagram"></i></a>
