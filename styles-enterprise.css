@@ -200,6 +200,13 @@ body {
   z-index: 100;
 }
 
+/* smaller search bar on very small screens */
+@media (max-width: 576px) {
+  .search-container-wrapper {
+    min-width: 180px;
+  }
+}
+
 /* Mobile: center brand (logo + title) and place the toggler/menu below it */
 @media (max-width: 767.98px) {
   .navbar {
@@ -214,6 +221,47 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 0.25rem;
+  }
+
+  /* mobile: always layout nav links inline (prevents jump during collapse animation) */
+  .navbar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem; /* space between items */
+  }
+
+  /* search bar should always sit below nav links when menu is open */
+  .navbar-search-cart {
+    /* keep search at end so it naturally falls below inline items when collapse expands */
+    order: 2;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+
+  /* toggler icon transition / fade */
+  .navbar-toggler {
+    transition: background 0.3s;
+  }
+  .navbar-toggler .close-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(0deg);
+    font-size: 1.25rem;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none; /* clicks should go through to button */
+  }
+  .navbar-toggler.open .close-icon {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+  .navbar-toggler.open .navbar-toggler-icon {
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
 
   .navbar-brand {
@@ -248,10 +296,12 @@ body {
 
   .navbar-nav {
     display: flex;
-    flex-direction: column;
+    flex-direction: row; /* always row on mobile to keep horizontal alignment */
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.25rem;
+    gap: 1rem;
     padding: 0.5rem 0;
+    transition: all 0.3s ease;
   }
 
   .navbar-nav .nav-link {

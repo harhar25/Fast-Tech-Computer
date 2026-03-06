@@ -73,6 +73,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     initializeScrollAnimations();
     
     // Product dropdown removed; no custom nav behaviour needed.
+    // Add mobile icon toggling for navbar collapse
+    const navbarToggler = document.querySelector('.navbar-toggler');
+    const navbarCollapse = document.getElementById('navbarNav');
+    if (navbarToggler && navbarCollapse) {
+        navbarCollapse.addEventListener('show.bs.collapse', () => {
+            navbarToggler.classList.add('open');
+        });
+        navbarCollapse.addEventListener('hide.bs.collapse', () => {
+            navbarToggler.classList.remove('open');
+        });
+    }
 });
 
 
