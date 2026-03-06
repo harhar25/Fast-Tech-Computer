@@ -177,6 +177,51 @@ body {
   width: 80%;
 }
 
+/* Touch devices: Disable hover effects that don't work well on mobile */
+@media (hover: none) and (pointer: coarse) {
+  .navbar-nav .nav-link:hover,
+  .navbar-nav .nav-link.active {
+    background: transparent;
+  }
+
+  .navbar-nav .nav-link:active {
+    background: rgba(59, 130, 246, 0.15);
+    color: white !important;
+  }
+
+  .navbar-nav .nav-link:active::after {
+    width: 80%;
+  }
+
+  /* Dropdown items on touch devices */
+  .dropdown-menu .dropdown-item:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+
+  .dropdown-menu .dropdown-item:active {
+    background-color: rgba(59, 130, 246, 0.2);
+  }
+
+  /* Prevent hover state from persisting during scroll */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  /* Ensure interactive elements respond to touch */
+  a, button, [role="button"], .btn {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Fix dropdown behavior on mobile */
+  .dropdown-menu {
+    position: fixed !important;
+    inset: auto !important;
+    transform: translateZ(0);
+  }
+}
+
 /* Navbar Search and Cart Alignment */
 .navbar-search-cart {
   display: flex;
@@ -898,6 +943,53 @@ body {
 
 .product-card:hover .product-image img {
   transform: scale(1.05);
+}
+
+/* Touch Device Optimizations: Disable hover effects on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .product-card:hover,
+  .product-card:hover::before {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: inherit;
+  }
+
+  .product-card:hover .product-image img {
+    transform: none;
+  }
+
+  .product-card:active,
+  .product-card:focus {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .category-card:hover::before {
+    transform: none;
+  }
+
+  .category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .category-card:hover .category-icon {
+    transform: none;
+  }
+
+  .category-card:active,
+  .category-card:focus {
+    transform: translateY(-4px);
+  }
+
+  /* Links should show active state on touch, not hover state */
+  a:hover:not(.btn):not(.nav-link) {
+    opacity: 1;
+  }
+
+  a:active:not(.btn):not(.nav-link) {
+    opacity: 0.8;
+  }
 }
 
 /* Out of Stock Styling */

@@ -85,26 +85,58 @@ function initializeNavBehavior() {
         // Use a data-href attribute to point to the products page
         productsToggle.setAttribute('data-href', 'products.html');
 
+        // Detect if device supports hover (mouse/trackpad vs touch)
+        const canHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        const isTouchDevice = window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
         productsToggle.addEventListener('click', function (e) {
             const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
 
-            // If the navbar is collapsed / small screen, navigate instead of toggling
-            // Bootstrap's lg breakpoint is 992px; treat anything below as mobile/tablet
-            if (viewportWidth < 992) {
-                // Prevent Bootstrap dropdown toggle from interfering
-                e.preventDefault();
-                // Close the navbar collapse if open (improves UX)
-                const navbarCollapse = document.getElementById('navbarNav');
-                if (navbarCollapse && navbarCollapse.classList.contains('show')) {
-                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse);
-                    bsCollapse.hide();
+            // On touch devices and small screens, navigate directly instead of showing dropdown
+            if (isTouchDevice || viewportWidth < 992) {
+                // Check if dropdown is already open
+                const dropdownMenu = this.nextElementSibling;
+                const isDropdownOpen = dropdownMenu && dropdownMenu.classList.contains('show');
+
+                if (isDropdownOpen) {
+                    // If dropdown is open, close it
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const bsDropdown = bootstrap.Dropdown.getInstance(this);
+                    if (bsDropdown) {
+                        bsDropdown.hide();
+                    }
+                } else if (isTouchDevice && viewportWidth < 992) {
+                    // On touch devices and mobile, navigate directly
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const navbarCollapse = document.getElementById('navbarNav');
+                    if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse);
+                        bsCollapse.hide();
+                    }
+                    // Navigate to products page
+                    const href = productsToggle.getAttribute('data-href') || 'products.html';
+                    window.location.href = href;
                 }
-                // Navigate to products page
-                const href = productsToggle.getAttribute('data-href') || 'products.html';
-                window.location.href = href;
             }
-            // On larger screens do nothing special (allow dropdown)
+            // On larger screens with mouse, allow dropdown toggle to work
         });
+
+        // Close dropdown when clicking outside on touch devices
+        if (isTouchDevice) {
+            document.addEventListener('click', function(e) {
+                const dropdown = document.querySelector('.dropdown-menu.show');
+                const toggle = document.querySelector('.nav-link.dropdown-toggle');
+                
+                if (dropdown && toggle && !dropdown.contains(e.target) && !toggle.contains(e.target)) {
+                    const bsDropdown = bootstrap.Dropdown.getInstance(toggle);
+                    if (bsDropdown) {
+                        bsDropdown.hide();
+                    }
+                }
+            });
+        }
     } catch (err) {
         console.error('Error initializing nav behavior', err);
     }
@@ -255,10 +287,11 @@ function loadFeaturedProducts() {
         return;
     }
     
-    // Filter for featured products (products with badge "new" or "hot" only)
+    // Filter for featured products (ONLY products with badge "new" or "hot")
     const featuredProducts = allProducts.filter(product => {
-        console.log(`🔍 Checking product: ${product.name}, badge: ${product.badge}`);
-        return product.badge === 'new' || product.badge === 'hot';
+        const hasBadge = product.badge && (product.badge === 'new' || product.badge === 'hot');
+        console.log(`🔍 Checking product: ${product.name}, badge: "${product.badge}", includeInFeatured: ${hasBadge}`);
+        return hasBadge;
     }).slice(0, 8);
     
     console.log('⭐ Featured products found:', featuredProducts.length);
