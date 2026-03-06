@@ -36,14 +36,14 @@ function getProductById(id) {
 // Get featured products
 function getFeaturedProducts(limit = 8) {
     return getAllProducts()
-        .filter(product => product.badge === 'hot' || product.badge === 'new')
+        .filter(product => product.badge && (product.badge === 'hot' || product.badge === 'new'))
         .slice(0, limit);
 }
 
 // Get deal products
 function getDealProducts(limit = 4) {
     return getAllProducts()
-        .filter(product => product.originalPrice && product.originalPrice > product.price)
+        .filter(product => product.badge === 'sale')
         .slice(0, limit);
 }
 
