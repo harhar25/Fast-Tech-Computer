@@ -21,18 +21,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles-enterprise.css">
-    <style>
-        /* Reduce navbar brand text size on small phones */
-        @media (max-width: 576px) {
-            .navbar-brand > span { font-size: 40px !important; }
-        }
-    </style>
+
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Products - Fast Tech","url":"https://fasttechcomputers.netlify.app/products.html"}</script>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-        <div class="container-fluid px-0">
+        <!-- add horizontal padding so brand and search aren't flush against the viewport edges -->
+        <div class="container px-3">
             <a class="navbar-brand fw-bold" href="index.html">
                 <div class="brand-stack">
                     <img src="logo.png" alt="Fast Tech Logo" class="brand-logo">
